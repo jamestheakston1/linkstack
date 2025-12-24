@@ -14,6 +14,7 @@
         #phone-preview { transition: all 0.4s ease; background-size: cover; background-position: center; position: sticky; top: 100px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
+        .verified-icon { width: 24px; height: 24px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -97,17 +98,14 @@
                         <h3 class="text-lg font-black">Social Connections</h3>
                         <span id="biz-status-pill" class="hidden px-3 py-1 bg-indigo-600 text-[10px] text-white font-black rounded-full uppercase tracking-tighter">Business Pro</span>
                     </div>
-                    
                     <div class="space-y-4">
                         <input type="text" id="social-ig" placeholder="Instagram Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                         <input type="text" id="social-tw" placeholder="Twitter/X Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                        
                         <div id="pro-social-fields" class="hidden space-y-4 border-t border-slate-100 pt-4">
                             <input type="text" id="social-li" placeholder="LinkedIn Profile URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                             <input type="text" id="social-yt" placeholder="YouTube Channel URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                             <input type="text" id="social-wa" placeholder="WhatsApp Number" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                         </div>
-
                         <div id="upgrade-social-promo" class="p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
                             <p class="text-xs font-bold text-slate-400 uppercase mb-2 tracking-widest">Unlock Pro Socials</p>
                             <p class="text-sm text-slate-500 mb-4">Add LinkedIn, YouTube, and WhatsApp by upgrading.</p>
@@ -128,15 +126,26 @@
                     </div>
 
                     <div id="business-stats" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
-                        <div class="flex justify-between items-end">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-2xl font-black">Verification Status</h3>
+                            <div id="v-status-indicator" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest"></div>
+                        </div>
+
+                        <div id="verification-checklist" class="space-y-3 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Requirements for verification</p>
+                            <div class="flex items-center gap-3 text-sm" id="check-biz"><i data-feather="circle" class="w-4 h-4"></i> Business Account</div>
+                            <div class="flex items-center gap-3 text-sm" id="check-handle"><i data-feather="circle" class="w-4 h-4"></i> Set Custom Handle</div>
+                            <div class="flex items-center gap-3 text-sm" id="check-bio"><i data-feather="circle" class="w-4 h-4"></i> Biography Filled</div>
+                            <div class="flex items-center gap-3 text-sm" id="check-avatar"><i data-feather="circle" class="w-4 h-4"></i> Profile Avatar Set</div>
+                            <div class="flex items-center gap-3 text-sm" id="check-links"><i data-feather="circle" class="w-4 h-4"></i> At least 2 links</div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100 flex justify-between items-end">
                             <h3 class="text-2xl font-black">Deep Insights</h3>
                             <div class="text-right">
                                 <span id="total-visits" class="text-4xl font-black text-indigo-600">0</span>
                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Lifetime Visits</p>
                             </div>
-                        </div>
-                        <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                            <p class="text-slate-500 text-sm font-medium italic">Advanced click-tracking and geographic data visualization loading...</p>
                         </div>
                         <button onclick="toggleBusiness(false)" class="text-xs font-bold text-red-400 hover:text-red-600 transition">Switch back to Personal Account</button>
                     </div>
@@ -148,8 +157,8 @@
                     <div class="flex-1 overflow-y-auto scrollbar-hide p-8 text-center flex flex-col items-center">
                         <div class="relative inline-block mb-4">
                             <img id="preview-img" src="" class="w-24 h-24 rounded-full border-4 border-white/10 object-cover shadow-xl bg-slate-800">
-                            <div id="preview-v-badge" class="hidden absolute -right-1 bottom-1 bg-white rounded-full p-1 shadow-lg">
-                                <i data-feather="check-circle" class="w-4 h-4 text-indigo-600 fill-current"></i>
+                            <div id="preview-v-badge" class="hidden absolute -right-1 bottom-0">
+                                <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>
                             </div>
                         </div>
                         <h2 id="preview-name" class="text-white font-black text-xl tracking-tight mb-1"></h2>
@@ -172,6 +181,7 @@
 
         let currentUserId = null;
         let isBusinessUser = false;
+        let linkCount = 0;
 
         async function init() {
             feather.replace();
@@ -187,22 +197,29 @@
 
         async function loadData() {
             const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUserId).single();
+            const { count } = await supabaseClient.from('links').select('*', { count: 'exact', head: true }).eq('user_id', currentUserId);
+            
+            linkCount = count || 0;
+
             if (profile) {
                 isBusinessUser = profile.is_business === true;
-                const handle = profile.handle || 'yourname';
-                const fullUrl = `https://link-stack.pages.dev/?u=${handle}`;
+                const handle = profile.handle || '';
+                const bio = profile.bio || '';
+                const avatar = profile.avatar_url || '';
                 
+                const fullUrl = `https://link-stack.pages.dev/?u=${handle || 'yourname'}`;
                 document.getElementById('public-url-display').innerText = fullUrl;
-                document.getElementById('profile-handle').value = profile.handle || '';
-                document.getElementById('profile-avatar-url').value = profile.avatar_url || '';
-                document.getElementById('profile-bio').value = profile.bio || '';
+                document.getElementById('profile-handle').value = handle;
+                document.getElementById('profile-avatar-url').value = avatar;
+                document.getElementById('profile-bio').value = bio;
                 document.getElementById('profile-bg').value = profile.bg_color || '#0f172a';
                 
-                document.getElementById('preview-name').innerText = `@${handle}`;
-                document.getElementById('preview-img').src = profile.avatar_url || `https://ui-avatars.com/api/?name=${handle}`;
-                document.getElementById('preview-bio').innerText = profile.bio || '';
+                document.getElementById('preview-name').innerText = handle ? `@${handle}` : '@yourname';
+                document.getElementById('preview-img').src = avatar || `https://ui-avatars.com/api/?name=${handle || 'U'}`;
+                document.getElementById('preview-bio').innerText = bio;
                 document.getElementById('phone-preview').style.backgroundColor = profile.bg_color || '#0f172a';
-                document.getElementById('preview-v-badge').classList.toggle('hidden', !profile.is_verified);
+
+                updateVerificationLogic(profile, linkCount);
 
                 document.getElementById('pro-social-fields').classList.toggle('hidden', !isBusinessUser);
                 document.getElementById('upgrade-social-promo').classList.toggle('hidden', isBusinessUser);
@@ -231,6 +248,46 @@
             loadLinks();
         }
 
+        async function updateVerificationLogic(p, count) {
+            const criteria = {
+                biz: p.is_business === true,
+                handle: !!p.handle && p.handle.length > 2,
+                bio: !!p.bio && p.bio.length > 5,
+                avatar: !!p.avatar_url,
+                links: count >= 2
+            };
+
+            const isEligible = Object.values(criteria).every(v => v === true);
+
+            const updateItem = (id, met) => {
+                const el = document.getElementById(id);
+                el.className = met ? 'flex items-center gap-3 text-sm text-green-600 font-bold' : 'flex items-center gap-3 text-sm text-slate-400';
+                el.querySelector('i').setAttribute('data-feather', met ? 'check-circle' : 'circle');
+            };
+
+            updateItem('check-biz', criteria.biz);
+            updateItem('check-handle', criteria.handle);
+            updateItem('check-bio', criteria.bio);
+            updateItem('check-avatar', criteria.avatar);
+            updateItem('check-links', criteria.links);
+            feather.replace();
+
+            const indicator = document.getElementById('v-status-indicator');
+            if(isEligible) {
+                indicator.innerText = "Verified Account";
+                indicator.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-green-50 text-green-600 border border-green-100";
+                document.getElementById('preview-v-badge').classList.remove('hidden');
+            } else {
+                indicator.innerText = "Pending Verification";
+                indicator.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100";
+                document.getElementById('preview-v-badge').classList.add('hidden');
+            }
+
+            if(p.is_verified !== isEligible) {
+                await supabaseClient.from('profiles').update({ is_verified: isEligible }).eq('id', currentUserId);
+            }
+        }
+
         async function loadLinks() {
             const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false });
             const list = document.getElementById('links-editor-list');
@@ -257,15 +314,16 @@
         }
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
-            const handle = document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const handleInput = document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, '');
             const updates = {
-                handle: handle,
+                handle: handleInput,
                 avatar_url: document.getElementById('profile-avatar-url').value,
                 bio: document.getElementById('profile-bio').value,
                 bg_color: document.getElementById('profile-bg').value
             };
             const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUserId);
             if (!error) loadData();
+            else showModal("Error", "That handle is already taken.");
         });
 
         document.getElementById('save-socials-btn').addEventListener('click', async () => {
@@ -286,10 +344,7 @@
         });
 
         async function toggleBusiness(status) {
-            const { error } = await supabaseClient.from('profiles').update({ 
-                is_business: status,
-                is_verified: status 
-            }).eq('id', currentUserId);
+            const { error } = await supabaseClient.from('profiles').update({ is_business: status }).eq('id', currentUserId);
             if (!error) loadData();
         }
 
@@ -300,12 +355,12 @@
             await supabaseClient.from('links').insert([{ user_id: currentUserId, label, url }]);
             document.getElementById('link-label').value = '';
             document.getElementById('link-url').value = '';
-            loadLinks();
+            loadData();
         });
 
         async function deleteLink(id) {
             await supabaseClient.from('links').delete().eq('id', id);
-            loadLinks();
+            loadData();
         }
 
         function copyPublicLink() {

@@ -9,49 +9,131 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
+        .modal-bg { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
         .hidden { display: none !important; }
+        .auth-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .auth-card:hover { transform: translateY(-5px); border-color: #6366f1; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
     <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
             <i data-feather="layers"></i><span>LinkStack</span>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="scrollToAuth()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:scale-105 transition">Sign In</button>
+            <button onclick="openAuthModal()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:scale-105 transition">Sign In</button>
         </div>
     </nav>
 
     <main id="main-content" class="pt-24">
-        <section class="max-w-7xl mx-auto px-6 py-20 text-center">
+        <section class="max-w-7xl mx-auto px-6 py-24 text-center">
             <span class="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest mb-6 inline-block">The ultimate link in bio</span>
             <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9]">Everything you are <br><span class="text-indigo-600">in one simple link.</span></h1>
             <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto font-medium">Join thousands of creators and businesses using LinkStack to share their content, sell products, and grow their audience.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="scrollToAuth()" class="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-2xl shadow-indigo-200 hover:scale-105 transition">Get Started For Free</button>
+                <button onclick="openAuthModal()" class="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-2xl shadow-indigo-200 hover:scale-105 transition flex items-center justify-center gap-2">
+                    <i data-feather="zap"></i> Get Started For Free
+                </button>
                 <button class="px-10 py-5 bg-white border-2 border-slate-100 text-slate-900 font-black rounded-2xl hover:bg-slate-50 transition">View Examples</button>
             </div>
         </section>
 
-        <section id="auth-section" class="max-w-md mx-auto py-20 px-6">
-            <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                <h2 class="text-3xl font-black mb-8 tracking-tighter">Claim your <span class="text-indigo-600">Stack.</span></h2>
+        <section class="max-w-7xl mx-auto px-6 py-20 bg-white rounded-[3rem] mb-20 border border-slate-100 shadow-sm">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black tracking-tight mb-4">Powerful features for creators</h2>
+                <p class="text-slate-500">Everything you need to manage your online presence.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12">
                 <div class="space-y-4">
-                    <input type="email" id="email" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Email">
-                    <input type="password" id="password" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Password">
-                    <button id="login-btn" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-100 hover:scale-[1.02] transition">Sign In</button>
-                    <button id="signup-btn" class="w-full text-slate-400 font-bold py-2 text-sm">Create New Account</button>
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center"><i data-feather="layout"></i></div>
+                    <h3 class="text-xl font-bold">Custom Themes</h3>
+                    <p class="text-slate-500 text-sm">Personalize your page with beautiful themes, custom colors, and unique layouts.</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><i data-feather="bar-chart-2"></i></div>
+                    <h3 class="text-xl font-bold">Advanced Analytics</h3>
+                    <p class="text-slate-500 text-sm">Track your clicks, location data, and traffic sources with our Business suite.</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center"><i data-feather="shield"></i></div>
+                    <h3 class="text-xl font-bold">Verified Badge</h3>
+                    <p class="text-slate-500 text-sm">Build trust with your audience through our professional verification system.</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
-        <div class="bg-white rounded-[2rem] p-8 max-sm w-full shadow-2xl text-center">
-            <h3 id="modal-title" class="text-xl font-bold mb-2">Notification</h3>
-            <p id="modal-message" class="text-slate-600 mb-6 text-sm"></p>
-            <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl">Dismiss</button>
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-12 px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 mb-4">
+                    <i data-feather="layers"></i><span>LinkStack</span>
+                </div>
+                <p class="text-slate-500 max-w-xs text-sm font-medium leading-relaxed">
+                    The ultimate digital identity platform for creators and businesses to centralize their online presence.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-black text-sm uppercase tracking-widest text-slate-900 mb-6">Legal</h4>
+                <ul class="space-y-4 text-sm font-bold text-slate-400">
+                    <li><a href="/privacy" class="hover:text-indigo-600 transition">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-black text-sm uppercase tracking-widest text-slate-900 mb-6">Landing Pages</h4>
+                <ul class="space-y-4 text-sm font-bold text-slate-400">
+                    <li><a href="/alternatives/linktree.html" class="hover:text-indigo-600 transition">Linktree Alternatives</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-slate-400 text-sm font-bold">© James Theakston 2026</p>
+            <div class="flex gap-6">
+                <a href="https://github.com/jamestheakston1/linkstack" target="_blank" rel="noopener noreferrer">
+                    <i data-feather="github" class="w-5 h-5 text-slate-300 hover:text-indigo-600 cursor-pointer transition"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl relative overflow-hidden">
+            <button onclick="closeAuthModal()" class="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition text-slate-400"><i data-feather="x"></i></button>
+            
+            <div id="auth-selection" class="grid md:grid-cols-2 gap-6 pt-4">
+                <div onclick="showAuthForm('login')" class="auth-card p-8 border-2 border-slate-100 rounded-[2rem] cursor-pointer bg-slate-50 text-center">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"><i data-feather="log-in" class="text-indigo-600"></i></div>
+                    <h4 class="text-2xl font-black mb-2">Welcome Back</h4>
+                    <p class="text-slate-500 text-sm">Sign in to manage your existing stack.</p>
+                </div>
+                <div onclick="showAuthForm('signup')" class="auth-card p-8 border-2 border-indigo-100 rounded-[2rem] cursor-pointer bg-indigo-50/50 text-center">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm"><i data-feather="user-plus" class="text-indigo-600"></i></div>
+                    <h4 class="text-2xl font-black mb-2">Join Now</h4>
+                    <p class="text-slate-500 text-sm">Create a new profile and start sharing.</p>
+                </div>
+            </div>
+
+            <div id="auth-form" class="hidden pt-4">
+                <button onclick="backToSelection()" class="text-xs font-bold text-indigo-600 mb-6 flex items-center gap-1"><i data-feather="arrow-left" class="w-3 h-3"></i> Back to options</button>
+                <h3 id="form-title" class="text-3xl font-black mb-8 tracking-tighter">Account</h3>
+                <div class="space-y-4">
+                    <input type="email" id="email" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Email Address">
+                    <input type="password" id="password" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Password">
+                    <button id="auth-submit-btn" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-black transition flex items-center justify-center gap-2"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="msg-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center">
+            <div id="msg-icon-container" class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i id="msg-feather-icon" data-feather="bell" class="w-8 h-8"></i>
+            </div>
+            <h3 id="msg-title" class="text-2xl font-black mb-2"></h3>
+            <p id="msg-content" class="text-slate-600 mb-8 text-sm"></p>
+            <button onclick="closeMsgModal()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl">Dismiss</button>
         </div>
     </div>
 
@@ -60,30 +142,24 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function scrollToAuth() {
-            document.getElementById('auth-section').scrollIntoView({ behavior: 'smooth' });
-        }
+        let currentMode = 'login';
 
         async function init() {
             feather.replace();
-            
             const urlParams = new URLSearchParams(window.location.search);
             const handle = urlParams.get('u');
+            const authRequested = urlParams.get('auth');
 
             if (handle) {
                 document.getElementById('main-content').classList.add('opacity-0');
-                const { data, error } = await supabaseClient
-                    .from('profiles')
-                    .select('handle')
-                    .eq('handle', handle.toLowerCase())
-                    .single();
-
-                if (data) {
-                    window.location.href = `/view?u=${handle}`;
-                } else {
+                const { data } = await supabaseClient.from('profiles').select('handle').eq('handle', handle.toLowerCase()).single();
+                if (data) window.location.href = `/view?u=${handle}`;
+                else {
                     document.getElementById('main-content').classList.remove('opacity-0');
-                    showModal("Profile Not Found", "The handle you are looking for doesn't exist yet.");
+                    showMsg("Profile Not Found", "The handle you are looking for doesn't exist yet.", "alert-circle");
                 }
+            } else if (authRequested === 'true') {
+                openAuthModal();
             } else {
                 checkUser();
             }
@@ -94,32 +170,60 @@
             if (session) window.location.href = '/dashboard.html';
         }
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            backToSelection();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function showAuthForm(mode) {
+            currentMode = mode;
+            document.getElementById('auth-selection').classList.add('hidden');
+            document.getElementById('auth-form').classList.remove('hidden');
+            document.getElementById('form-title').innerText = mode === 'login' ? 'Welcome Back' : 'Create Account';
+            const btn = document.getElementById('auth-submit-btn');
+            btn.innerText = mode === 'login' ? 'Sign In' : 'Create My Stack';
+            btn.onclick = mode === 'login' ? handleLogin : handleSignup;
+            feather.replace();
+        }
+
+        function backToSelection() {
+            document.getElementById('auth-selection').classList.remove('hidden');
+            document.getElementById('auth-form').classList.add('hidden');
+            feather.replace();
+        }
+
+        async function handleLogin() {
             const { error } = await supabaseClient.auth.signInWithPassword({
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value
             });
             if (!error) window.location.href = '/dashboard.html';
-            else showModal("Auth Error", error.message);
-        });
+            else showMsg("Auth Error", error.message, "alert-circle");
+        }
 
-        document.getElementById('signup-btn').addEventListener('click', async () => {
+        async function handleSignup() {
             const { error } = await supabaseClient.auth.signUp({
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value
             });
-            if (!error) showModal("Success", "Check your email for the confirmation link.");
-            else showModal("Auth Error", error.message);
-        });
-
-        function showModal(t, m) {
-            document.getElementById('modal-title').innerText = t;
-            document.getElementById('modal-message').innerText = m;
-            document.getElementById('modal-container').classList.remove('hidden');
+            if (!error) showMsg("Success", "Check your email for the confirmation link.", "check-circle");
+            else showMsg("Auth Error", error.message, "alert-circle");
         }
 
-        function closeModal() {
-            document.getElementById('modal-container').classList.add('hidden');
+        function showMsg(t, m, icon = "bell") {
+            document.getElementById('msg-title').innerText = t;
+            document.getElementById('msg-content').innerText = m;
+            document.getElementById('msg-feather-icon').setAttribute('data-feather', icon);
+            document.getElementById('msg-modal').classList.remove('hidden');
+            feather.replace();
+        }
+
+        function closeMsgModal() {
+            document.getElementById('msg-modal').classList.add('hidden');
         }
 
         init();

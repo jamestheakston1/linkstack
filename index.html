@@ -40,7 +40,7 @@
     </div>
 
     <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+        <div class="bg-white rounded-3xl p-8 max-sm w-full shadow-2xl text-center">
             <div id="modal-icon" class="mx-auto w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4"><i data-feather="info"></i></div>
             <h3 id="modal-title" class="text-xl font-bold mb-2">Notice</h3>
             <p id="modal-message" class="text-slate-600 mb-6"></p>
@@ -183,20 +183,16 @@
                 <div id="phone-preview" class="relative bg-slate-900 rounded-[3.5rem] h-[650px] w-full max-w-[320px] mx-auto overflow-hidden shadow-2xl border-[10px] border-slate-800">
                     <div class="relative z-10 flex flex-col items-center pt-12 px-6 text-center h-full overflow-y-auto scrollbar-hide">
                         <img id="preview-avatar" src="https://ui-avatars.com/api/?name=?" class="w-24 h-24 rounded-full border-4 border-white/20 mb-4 object-cover">
-                        
                         <div class="flex items-center justify-center gap-1 mb-1">
                             <p id="preview-handle" class="text-sm font-bold text-white uppercase tracking-widest">@USER</p>
                             <span id="verified-badge" class="hidden text-blue-400"><i data-feather="check-circle" class="w-4 h-4"></i></span>
                         </div>
-
                         <div id="preview-business-tag" class="hidden mb-3">
                             <span class="text-[10px] font-black text-indigo-300 uppercase tracking-tighter px-2 py-0.5 rounded-full business-badge flex items-center gap-1">
                                 <i data-feather="briefcase" class="w-2 h-2"></i> Business Account
                             </span>
                         </div>
-
                         <p id="preview-bio" class="text-xs text-slate-300 mb-8 px-4 opacity-80"></p>
-
                         <div id="links-list" class="w-full space-y-4 pb-12"></div>
                     </div>
                     <div class="absolute inset-0 bg-black/40 z-0"></div>
@@ -217,8 +213,6 @@
         async function init() {
             feather.replace();
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('status') === 'business_activated') showModal("Success", "Business account activated!");
-            
             if (urlParams.get('u')) showPublic(urlParams.get('u'));
             else checkUser();
         }
@@ -234,13 +228,23 @@
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             document.getElementById('logout-btn-action').classList.remove('hidden');
+            
             await loadProfile(user.id);
             fetchLinks(user.id);
-            if (!currentProfile.handle) document.getElementById('onboarding-modal').classList.remove('hidden');
+            
+            if (currentProfile && !currentProfile.handle) {
+                document.getElementById('onboarding-modal').classList.remove('hidden');
+            }
         }
 
         async function loadProfile(userId) {
-            const { data } = await supabaseClient.from('profiles').select('*').eq('id', userId).single();
+            let { data, error } = await supabaseClient.from('profiles').select('*').eq('id', userId).maybeSingle();
+            
+            if (!data && !error) {
+                const { data: newProfile, error: insertError } = await supabaseClient.from('profiles').insert([{ id: userId }]).select().single();
+                if (!insertError) data = newProfile;
+            }
+
             if (data) {
                 currentProfile = data;
                 document.getElementById('profile-handle').value = data.handle || '';
@@ -255,7 +259,12 @@
                 document.getElementById('preview-business-tag').classList.toggle('hidden', !data.is_business);
                 document.getElementById('business-status-active').classList.toggle('hidden', !data.is_business);
                 document.getElementById('business-status-inactive').classList.toggle('hidden', !!data.is_business);
-                if(data.avatar_url) document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
+                
+                if(data.avatar_url) {
+                    const avatarSrc = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
+                    document.getElementById('preview-avatar').src = avatarSrc;
+                }
+                
                 if(data.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
                 updateUrlDisplay(data);
                 updateCriteria();
@@ -263,13 +272,11 @@
             }
         }
 
-        // Preview Updates
         function updatePreviewHandle(v) { document.getElementById('preview-handle').innerText = '@' + (v || 'USER'); }
         function updatePreviewBio(v) { document.getElementById('preview-bio').innerText = v; }
         function updatePreviewBg(c) { document.getElementById('phone-preview').style.backgroundColor = c; }
         function updatePreviewBgImg(u) { document.getElementById('phone-preview').style.backgroundImage = u ? `url('${u}')` : 'none'; }
 
-        // Core Functions
         async function fetchLinks(userId, isPublic = false) {
             const { data } = await supabaseClient.from('links').select('*').eq('user_id', userId).order('created_at');
             currentLinksCount = data?.length || 0;
@@ -296,7 +303,7 @@
             const { data: clicks } = await supabaseClient.from('link_clicks').select('link_id').eq('user_id', user.id);
             const labels = []; const counts = [];
             const listEl = document.getElementById('analytics-list');
-            listEl.innerHTML = links.map(l => {
+            listEl.innerHTML = (links || []).map(l => {
                 const count = (clicks || []).filter(c => c.link_id === l.id).length;
                 labels.push(l.label); counts.push(count);
                 return `<div class="flex justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm"><span class="font-bold">${l.label}</span><span class="text-indigo-600 font-black">${count} clicks</span></div>`;
@@ -314,7 +321,6 @@
             });
         }
 
-        // Onboarding
         document.getElementById('save-onboarding-btn').addEventListener('click', async () => {
             const handle = document.getElementById('onboarding-handle-input').value.trim().toLowerCase();
             if (!handle) return;
@@ -326,7 +332,6 @@
             loadProfile(user.id);
         });
 
-        // Verification Criteria
         function updateCriteria() {
             setCrit('crit-handle', !!currentProfile?.handle);
             setCrit('crit-avatar', !!currentProfile?.avatar_url);
@@ -345,7 +350,6 @@
             const icon = el.querySelector('i'); if(icon) { icon.dataset.feather = met ? "check-circle" : "circle"; feather.replace(); }
         }
 
-        // Event Listeners
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const label = document.getElementById('link-label').value;
             const url = document.getElementById('link-url').value;
@@ -363,19 +367,25 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             const handle = document.getElementById('profile-handle').value.toLowerCase();
             let avatarPath = currentProfile?.avatar_url;
+            
             const fileInput = document.getElementById('avatar-upload');
             if (fileInput.files.length) {
                 const file = fileInput.files[0];
-                const path = `${user.id}/${Date.now()}_${file.name}`;
-                await supabaseClient.storage.from('avatars').upload(path, file);
-                avatarPath = path;
+                const fileExt = file.name.split('.').pop();
+                const path = `${user.id}/avatar.${fileExt}`;
+                
+                // Upload to the 'avatars' bucket
+                const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(path, file, { upsert: true });
+                if (!uploadError) avatarPath = path;
             }
+
             await supabaseClient.from('profiles').update({
                 handle, bio: document.getElementById('profile-bio').value,
                 bg_color: document.getElementById('profile-bg').value,
                 custom_bg_url: document.getElementById('profile-bg-url').value,
                 avatar_url: avatarPath
             }).eq('id', user.id);
+            
             loadProfile(user.id);
             showModal("Updated", "Settings saved successfully.");
         });
@@ -386,7 +396,6 @@
             showModal("Account Updated", status ? "Business mode on." : "Back to Personal.");
         }
 
-        // Auth & Nav
         document.getElementById('login-btn').addEventListener('click', async () => {
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value });
             if (error) showModal("Error", error.message); else setupDashboard(data.user);
@@ -424,7 +433,9 @@
                 document.getElementById('preview-handle').innerText = '@' + p.handle;
                 document.getElementById('preview-bio').innerText = p.bio || '';
                 document.getElementById('preview-business-tag').classList.toggle('hidden', !p.is_business);
-                if(p.avatar_url) document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${p.avatar_url}`;
+                if(p.avatar_url) {
+                    document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${p.avatar_url}`;
+                }
                 if(p.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
                 fetchLinks(p.id, true);
             }

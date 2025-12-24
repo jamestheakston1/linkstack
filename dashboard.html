@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
     <style>
@@ -20,6 +21,7 @@
         .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1.25rem; }
         .theme-card.active { border-color: #6366f1; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         #map { width: 100%; height: 300px; border-radius: 1.5rem; }
+        .sortable-ghost { opacity: 0.3; background: #f1f5f9; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -35,7 +37,7 @@
             <h3 id="modal-title" class="text-2xl font-black mb-2">Notification</h3>
             <p id="modal-message" class="text-slate-600 mb-8 text-sm leading-relaxed"></p>
             <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition">
-                Dismiss
+                <i data-feather="check-circle" class="w-4 h-4"></i> Dismiss
             </button>
         </div>
     </div>
@@ -44,7 +46,7 @@
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.reload()">
             <i data-feather="layers"></i><span>LinkStack</span>
         </div>
-        <button id="logout-btn" class="px-5 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2 transition hover:bg-red-100">
+        <button id="logout-btn" class="hidden px-5 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2">
             <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
         </button>
     </nav>
@@ -64,10 +66,9 @@
                 </div>
 
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
-                    <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap transition">Links</button>
-                    <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Appearance</button>
-                    <button onclick="switchTab('verification')" id="tab-verification" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Verification</button>
-                    <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Analytics</button>
+                    <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap">Links</button>
+                    <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Appearance</button>
+                    <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Analytics</button>
                 </div>
 
                 <div id="section-links" class="space-y-6">
@@ -96,6 +97,7 @@
                             </button>
                         </div>
                     </div>
+
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-6">Themes</h3>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="themes-grid">
@@ -106,80 +108,36 @@
                     </div>
                 </div>
 
-                <div id="section-verification" class="hidden space-y-6">
-                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                        <h3 class="text-2xl font-black mb-2">Account Verification</h3>
-                        <p class="text-slate-500 text-sm mb-8">Verified accounts get a badge and priority in search results.</p>
-                        
-                        <div class="space-y-4" id="verification-checklist">
-                            <div id="check-pro" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle" class="text-slate-300"></i></div>
-                                    <span class="font-bold text-sm">Business Pro Account</span>
-                                </div>
-                                <a href="/business" class="text-xs font-black text-indigo-600">Get Pro</a>
-                            </div>
-                            <div id="check-bio" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle" class="text-slate-300"></i></div>
-                                    <span class="font-bold text-sm">Profile Bio set</span>
-                                </div>
-                            </div>
-                            <div id="check-avatar" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle" class="text-slate-300"></i></div>
-                                    <span class="font-bold text-sm">Profile Avatar set</span>
-                                </div>
-                            </div>
-                            <div id="check-links" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle" class="text-slate-300"></i></div>
-                                    <span class="font-bold text-sm">2+ Links in Stack</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="verification-action-area" class="mt-8">
-                            </div>
-                    </div>
-                </div>
-
                 <div id="section-business" class="hidden space-y-6">
-                    <div id="business-paywall" class="hidden">
-                        <div class="bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
-                            <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-                                <i data-feather="bar-chart-2" class="w-10 h-10"></i>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-2xl font-black">Live Analytics</h3>
+                            <div class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Active
                             </div>
-                            <h3 class="text-3xl font-black mb-4">Unlock Business Pro</h3>
-                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights into your audience, visit tracking, and link performance.</p>
-                            <button onclick="window.location.href='/business'" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                                Get Business
-                            </button>
                         </div>
-                    </div>
-
-                    <div id="business-content" class="hidden space-y-6">
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                            <h3 class="text-2xl font-black mb-8">Performance</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visits</p>
-                                    <p id="stat-visits" class="text-2xl font-black">0</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clicks</p>
-                                    <p id="stat-clicks" class="text-2xl font-black">0</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p>
-                                    <p id="stat-ctr" class="text-2xl font-black">0%</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Countries</p>
-                                    <p id="stat-countries" class="text-2xl font-black">0</p>
-                                </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visits</p>
+                                <p id="stat-visits" class="text-2xl font-black">0</p>
                             </div>
-                            <div class="h-64 mb-8"><canvas id="visitsChart"></canvas></div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clicks</p>
+                                <p id="stat-clicks" class="text-2xl font-black">0</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p>
+                                <p id="stat-ctr" class="text-2xl font-black">0%</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Countries</p>
+                                <p id="stat-countries" class="text-2xl font-black">0</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div class="h-64"><canvas id="visitsChart"></canvas></div>
                             <div id="map"></div>
                         </div>
                     </div>
@@ -210,8 +168,8 @@
 
         let currentUser = null, selectedTheme = 'default', visitChart = null, cachedProfile = null, cachedLinks = [];
 
-        const goldBadge = `<svg width="28" height="28" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
-        const standardBadge = `<svg width="28" height="28" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
+        const goldBadge = `<svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
+        const standardBadge = `<svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
 
         const themeConfig = {
             default: { bg: '#0f172a', btn: 'bg-white/10 text-white border-white/10', text: 'text-white' },
@@ -221,9 +179,30 @@
 
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) return window.location.replace('/');
+            if (!session) return window.location.href = '/';
             currentUser = session.user;
+            document.getElementById('logout-btn').classList.remove('hidden');
+            
+            initSortable();
             await loadAll();
+        }
+
+        function initSortable() {
+            const el = document.getElementById('links-editor-list');
+            Sortable.create(el, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: async () => {
+                    const items = Array.from(el.children);
+                    for (let i = 0; i < items.length; i++) {
+                        const id = items[i].getAttribute('data-id');
+                        await supabaseClient.from('links').update({ order_index: i }).eq('id', id);
+                    }
+                    const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUser.id).order('order_index', { ascending: true });
+                    cachedLinks = links || [];
+                    updatePreview();
+                }
+            });
         }
 
         async function loadAll() {
@@ -234,16 +213,7 @@
             selectedTheme = p.theme_id || 'default';
             updateForms();
             updatePreview();
-            updateVerification();
-            
-            if (p.is_business) {
-                document.getElementById('business-content').classList.remove('hidden');
-                document.getElementById('business-paywall').classList.add('hidden');
-                loadAnalytics();
-            } else {
-                document.getElementById('business-paywall').classList.remove('hidden');
-                document.getElementById('business-content').classList.add('hidden');
-            }
+            loadAnalytics();
             feather.replace();
         }
 
@@ -254,82 +224,16 @@
             document.getElementById('profile-bio').value = p.bio || '';
             document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
             const list = document.getElementById('links-editor-list');
-            list.innerHTML = cachedLinks.map((l, index) => `
-                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+            list.innerHTML = cachedLinks.map((l) => `
+                <div data-id="${l.id}" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm cursor-move">
                     <div class="flex items-center gap-3">
-                        <div class="flex flex-col gap-1">
-                            <button onclick="reorderLink(${index}, -1)" class="p-1 hover:bg-slate-50 rounded text-slate-400"><i data-feather="chevron-up" class="w-3 h-3"></i></button>
-                            <button onclick="reorderLink(${index}, 1)" class="p-1 hover:bg-slate-50 rounded text-slate-400"><i data-feather="chevron-down" class="w-3 h-3"></i></button>
-                        </div>
+                        <i data-feather="menu" class="w-4 h-4 text-slate-300"></i>
                         <div class="truncate"><p class="font-bold text-sm">${l.label}</p></div>
                     </div>
                     <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
             feather.replace();
-        }
-
-        function updateVerification() {
-            const p = cachedProfile;
-            const checks = {
-                pro: p.is_business,
-                bio: !!p.bio && p.bio.length > 5,
-                avatar: !!p.avatar_url,
-                links: cachedLinks.length >= 2
-            };
-
-            const updateItem = (id, met) => {
-                const el = document.getElementById(id);
-                el.querySelector('.status-icon').innerHTML = met 
-                    ? `<i data-feather="check-circle" class="text-green-500"></i>` 
-                    : `<i data-feather="circle" class="text-slate-300"></i>`;
-                el.className = `flex items-center justify-between p-4 rounded-2xl ${met ? 'bg-green-50' : 'bg-slate-50'}`;
-            };
-
-            updateItem('check-pro', checks.pro);
-            updateItem('check-bio', checks.bio);
-            updateItem('check-avatar', checks.avatar);
-            updateItem('check-links', checks.links);
-
-            const allMet = Object.values(checks).every(v => v === true);
-            const actionArea = document.getElementById('verification-action-area');
-
-            if (p.is_verified) {
-                actionArea.innerHTML = `
-                    <div class="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl text-center">
-                        <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i data-feather="shield"></i>
-                        </div>
-                        <h4 class="font-black text-indigo-900">Account Verified</h4>
-                        <p class="text-indigo-600 text-xs">Your badge is now live on your profile.</p>
-                    </div>`;
-            } else if (allMet) {
-                actionArea.innerHTML = `
-                    <button onclick="applyVerification()" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition">
-                        Claim Verified Badge
-                    </button>`;
-            } else {
-                actionArea.innerHTML = `
-                    <div class="p-6 bg-slate-100 rounded-3xl text-center grayscale opacity-60">
-                        <p class="text-slate-500 text-sm font-bold">Complete all criteria to verify</p>
-                    </div>`;
-            }
-            feather.replace();
-        }
-
-        async function applyVerification() {
-            const { error } = await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id);
-            if (!error) { showModal("Verified!", "You are now officially verified.", "shield"); loadAll(); }
-        }
-
-        async function reorderLink(index, direction) {
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= cachedLinks.length) return;
-            const itemA = cachedLinks[index];
-            const itemB = cachedLinks[newIndex];
-            await supabaseClient.from('links').update({ order_index: newIndex }).eq('id', itemA.id);
-            await supabaseClient.from('links').update({ order_index: index }).eq('id', itemB.id);
-            loadAll();
         }
 
         function updatePreview() {
@@ -342,38 +246,63 @@
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
             document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-4 rounded-2xl font-black text-sm text-center border ${theme.btn}">${l.label}</div>`).join('');
+            
             const badgeContainer = document.getElementById('verification-badge-container');
-            if (p.is_verified) badgeContainer.innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
-            else badgeContainer.innerHTML = '';
+            if (p.is_verified || p.handle === 'james') {
+                badgeContainer.innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
+            } else {
+                badgeContainer.innerHTML = '';
+            }
         }
 
         async function loadAnalytics() {
             const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
             const { data: clicks } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
-            const { data: dailyData } = await supabaseClient.from('daily_stats').select('*').eq('profile_id', currentUser.id).limit(7);
+            const { data: dailyData } = await supabaseClient.from('daily_stats').select('*').eq('profile_id', currentUser.id).order('visit_date', { ascending: true }).limit(7);
+
             const visitCount = visits?.length || 0;
             const clickCount = clicks?.length || 0;
             const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
+            
             document.getElementById('stat-visits').innerText = visitCount;
             document.getElementById('stat-clicks').innerText = clickCount;
             document.getElementById('stat-ctr').innerText = ctr + '%';
             document.getElementById('stat-countries').innerText = [...new Set(visits?.map(v => v.country_code))].length;
-            new maplibregl.Map({ container: 'map', style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`, center: [0, 20], zoom: 1 });
+
+            new maplibregl.Map({
+                container: 'map',
+                style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
+                center: [0, 20],
+                zoom: 1
+            });
+
             if (visitChart) visitChart.destroy();
             visitChart = new Chart(document.getElementById('visitsChart'), {
                 type: 'line',
                 data: {
-                    labels: dailyData?.map(d => d.visit_date) || ['Today'],
-                    datasets: [{ label: 'Visits', data: dailyData?.map(d => d.visit_count) || [0], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4 }]
+                    labels: dailyData?.length ? dailyData.map(d => d.visit_date) : ['No Data'],
+                    datasets: [{ 
+                        label: 'Visits', 
+                        data: dailyData?.length ? dailyData.map(d => d.visit_count) : [0], 
+                        borderColor: '#6366f1', 
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4 
+                    }]
                 },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
-            const updates = { handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), avatar_url: document.getElementById('profile-avatar-url').value, bio: document.getElementById('profile-bio').value, theme_id: selectedTheme };
+            const updates = {
+                handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                avatar_url: document.getElementById('profile-avatar-url').value,
+                bio: document.getElementById('profile-bio').value,
+                theme_id: selectedTheme
+            };
             const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
-            if (!error) { showModal("Success", "Updated!", "check-circle"); loadAll(); }
+            if (!error) { showModal("Success", "Appearance updated!", "check-circle"); loadAll(); }
         });
 
         document.getElementById('add-link-btn').addEventListener('click', async () => {
@@ -381,28 +310,49 @@
             const url = document.getElementById('link-url').value;
             if(!label || !url) return;
             await supabaseClient.from('links').insert([{ user_id: currentUser.id, label, url, order_index: cachedLinks.length }]);
-            document.getElementById('link-label').value = ''; document.getElementById('link-url').value = ''; loadAll();
+            document.getElementById('link-label').value = '';
+            document.getElementById('link-url').value = '';
+            loadAll();
         });
 
-        async function deleteLink(id) { await supabaseClient.from('links').delete().eq('id', id); loadAll(); }
-        function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-' + id).classList.add('active'); updatePreview(); }
-        
-        function switchTab(t) { 
-            ['links','style','business','verification'].forEach(s => { 
-                document.getElementById('section-'+s).classList.add('hidden'); 
-                document.getElementById('tab-'+s).classList.remove('active-tab'); 
-            }); 
-            document.getElementById('section-'+t).classList.remove('hidden'); 
-            document.getElementById('tab-'+t).classList.add('active-tab'); 
+        async function deleteLink(id) {
+            await supabaseClient.from('links').delete().eq('id', id);
+            loadAll();
         }
 
-        function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Link copied!", "copy"); }
+        function setTheme(id) {
+            selectedTheme = id;
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('theme-' + id).classList.add('active');
+            updatePreview();
+        }
+
+        function switchTab(t) {
+            ['links','style','business'].forEach(s => {
+                document.getElementById('section-'+s).classList.add('hidden');
+                document.getElementById('tab-'+s).classList.remove('active-tab');
+            });
+            document.getElementById('section-'+t).classList.remove('hidden');
+            document.getElementById('tab-'+t).classList.add('active-tab');
+        }
+
+        function copyPublicLink() {
+            navigator.clipboard.writeText(document.getElementById('public-url-display').innerText);
+            showModal("Copied", "Link copied!", "copy");
+        }
+
         function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
-        function showModal(t, m, i) { document.getElementById('modal-title').innerText = t; document.getElementById('modal-message').innerText = m; document.getElementById('modal-feather-icon').setAttribute('data-feather', i); document.getElementById('modal-container').classList.remove('hidden'); feather.replace(); }
-        
+        function showModal(t, m, i) {
+            document.getElementById('modal-title').innerText = t;
+            document.getElementById('modal-message').innerText = m;
+            document.getElementById('modal-feather-icon').setAttribute('data-feather', i);
+            document.getElementById('modal-container').classList.remove('hidden');
+            feather.replace();
+        }
+
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
-            window.location.replace('/');
+            window.location.href = '/';
         });
 
         init();

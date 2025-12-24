@@ -222,7 +222,7 @@
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
+            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
             const list = document.getElementById('links-editor-list');
             list.innerHTML = cachedLinks.map((l) => `
                 <div data-id="${l.id}" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm cursor-move">

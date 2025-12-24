@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
     <style>
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .hidden { display: none !important; }
@@ -14,7 +18,8 @@
         #phone-preview { transition: all 0.4s ease; background-size: cover; background-position: center; position: sticky; top: 100px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
-        .verified-icon { width: 24px; height: 24px; }
+        .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1rem; }
+        .theme-card.active { border-color: #6366f1; transform: scale(1.02); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -37,7 +42,7 @@
     </nav>
 
     <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
-        <section id="dashboard-view" class="grid lg:grid-cols-12 gap-12">
+        <section class="grid lg:grid-cols-12 gap-12">
             
             <div class="lg:col-span-7 space-y-8">
                 
@@ -62,7 +67,7 @@
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-4">Add New Link</h3>
                         <div class="grid gap-3">
-                            <input type="text" id="link-label" placeholder="Link Label (e.g. My Portfolio)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
+                            <input type="text" id="link-label" placeholder="Link Label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                             <input type="url" id="link-url" placeholder="URL (https://...)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                             <button id="add-link-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mt-2">Add to Stack</button>
                         </div>
@@ -70,104 +75,82 @@
                     <div id="links-editor-list" class="space-y-3"></div>
                 </div>
 
-                <div id="section-style" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-6 shadow-sm">
-                    <h3 class="text-lg font-black">Identity & Style</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Handle (URL Slug)</label>
-                            <input type="text" id="profile-handle" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="username">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Avatar URL</label>
-                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="https://...">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Bio</label>
-                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Write something about yourself..."></textarea>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase">Theme Color</label>
-                            <input type="color" id="profile-bg" class="w-12 h-12 p-1 bg-white border rounded-xl cursor-pointer">
+                <div id="section-style" class="hidden space-y-8">
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-lg font-black mb-6">Identity & Style</h3>
+                        <div class="space-y-4">
+                            <input type="text" id="profile-handle" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Handle (e.g. james)">
+                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Avatar Image URL">
+                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Tell us about yourself..."></textarea>
                         </div>
                     </div>
-                    <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">Save Changes</button>
+
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-lg font-black mb-6">Themes</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="themes-grid">
+                            <div onclick="setTheme('default')" id="theme-default" class="theme-card bg-slate-900 text-white text-xs font-black uppercase">Midnight</div>
+                            <div onclick="setTheme('sunset')" id="theme-sunset" class="theme-card bg-gradient-to-br from-orange-400 to-pink-600 text-white text-xs font-black uppercase">Sunset</div>
+                            <div onclick="setTheme('forest')" id="theme-forest" class="theme-card bg-emerald-800 text-emerald-100 text-xs font-black uppercase">Forest</div>
+                            <div onclick="setTheme('cotton')" id="theme-cotton" class="theme-card bg-pink-100 text-pink-600 text-xs font-black uppercase">Cotton Candy</div>
+                            <div onclick="setTheme('glass')" id="theme-glass" class="theme-card bg-slate-200 text-slate-800 text-xs font-black uppercase border-dashed border-2">Glassmorphism</div>
+                        </div>
+                    </div>
+                    <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">Save Appearance</button>
                 </div>
 
-                <div id="section-social" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-6 shadow-sm">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-black">Social Connections</h3>
-                        <span id="biz-status-pill" class="hidden px-3 py-1 bg-indigo-600 text-[10px] text-white font-black rounded-full uppercase tracking-tighter">Business Pro</span>
-                    </div>
+                <div id="section-social" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+                    <h3 class="text-lg font-black">Social Connections</h3>
                     <div class="space-y-4">
                         <input type="text" id="social-ig" placeholder="Instagram Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                         <input type="text" id="social-tw" placeholder="Twitter/X Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                        <div id="pro-social-fields" class="hidden space-y-4 border-t border-slate-100 pt-4">
-                            <input type="text" id="social-li" placeholder="LinkedIn Profile URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                            <input type="text" id="social-yt" placeholder="YouTube Channel URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
+                        <div id="pro-social-fields" class="hidden space-y-4 pt-4 border-t">
+                            <input type="text" id="social-li" placeholder="LinkedIn URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
+                            <input type="text" id="social-yt" placeholder="YouTube URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                             <input type="text" id="social-wa" placeholder="WhatsApp Number" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
                         </div>
-                        <div id="upgrade-social-promo" class="p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
-                            <p class="text-xs font-bold text-slate-400 uppercase mb-2 tracking-widest">Unlock Pro Socials</p>
-                            <p class="text-sm text-slate-500 mb-4">Add LinkedIn, YouTube, and WhatsApp by upgrading.</p>
-                            <button onclick="location.href='/business.html'" class="text-indigo-600 font-black text-xs hover:underline">View Business Features →</button>
+                        <div id="biz-promo" class="p-6 bg-indigo-50 rounded-2xl text-center">
+                            <p class="text-sm font-bold text-indigo-600 mb-2">Unlock Pro Connections</p>
+                            <button onclick="switchTab('business')" class="text-xs font-black underline">Upgrade to Business</button>
                         </div>
                     </div>
                     <button id="save-socials-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black">Sync Socials</button>
                 </div>
 
                 <div id="section-business" class="hidden space-y-6">
-                    <div id="personal-upsell" class="bg-white p-10 rounded-[2.5rem] border border-slate-100 text-center shadow-sm">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <i data-feather="trending-up" class="w-8 h-8"></i>
-                        </div>
-                        <h3 class="text-2xl font-black mb-2">Upgrade to Business</h3>
-                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Unlock Verification, Pro Social Connections, and Deep Audience Insights.</p>
-                        <button onclick="window.location.href='/business.html'" class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-100">Get Started</button>
-                    </div>
-
-                    <div id="business-stats" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
+                    <div id="business-stats" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
                         <div class="flex justify-between items-start">
-                            <h3 class="text-2xl font-black">Verification Status</h3>
-                            <div id="v-status-indicator" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest"></div>
+                            <h3 class="text-2xl font-black">Analytics & Verification</h3>
+                            <div id="v-status-badge" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"></div>
                         </div>
 
-                        <div id="verification-checklist" class="space-y-3 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Requirements for verification</p>
-                            <div class="flex items-center gap-3 text-sm" id="check-biz"><i data-feather="circle" class="w-4 h-4"></i> Business Account</div>
-                            <div class="flex items-center gap-3 text-sm" id="check-handle"><i data-feather="circle" class="w-4 h-4"></i> Set Custom Handle</div>
-                            <div class="flex items-center gap-3 text-sm" id="check-bio"><i data-feather="circle" class="w-4 h-4"></i> Biography Filled</div>
-                            <div class="flex items-center gap-3 text-sm" id="check-avatar"><i data-feather="circle" class="w-4 h-4"></i> Profile Avatar Set</div>
-                            <div class="flex items-center gap-3 text-sm" id="check-links"><i data-feather="circle" class="w-4 h-4"></i> At least 2 links</div>
+                        <div id="verification-checklist" class="grid md:grid-cols-2 gap-4 p-6 bg-slate-50 rounded-3xl">
+                            <div id="v-biz" class="flex gap-3 items-center text-xs font-bold"><i data-feather="circle" class="w-4 h-4"></i> Business Pro</div>
+                            <div id="v-handle" class="flex gap-3 items-center text-xs font-bold"><i data-feather="circle" class="w-4 h-4"></i> Custom Handle</div>
+                            <div id="v-bio" class="flex gap-3 items-center text-xs font-bold"><i data-feather="circle" class="w-4 h-4"></i> Profile Bio</div>
+                            <div id="v-avatar" class="flex gap-3 items-center text-xs font-bold"><i data-feather="circle" class="w-4 h-4"></i> Avatar Set</div>
+                            <div id="v-links" class="flex gap-3 items-center text-xs font-bold"><i data-feather="circle" class="w-4 h-4"></i> 2+ Links</div>
                         </div>
 
-                        <div class="pt-6 border-t border-slate-100 flex justify-between items-end">
-                            <h3 class="text-2xl font-black">Deep Insights</h3>
-                            <div class="text-right">
-                                <span id="total-visits" class="text-4xl font-black text-indigo-600">0</span>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Lifetime Visits</p>
-                            </div>
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            <div class="h-64"><canvas id="visitsChart"></canvas></div>
+                            <div id="world-map" class="h-64 rounded-2xl overflow-hidden bg-slate-100"></div>
                         </div>
-                        <button onclick="toggleBusiness(false)" class="text-xs font-bold text-red-400 hover:text-red-600 transition">Switch back to Personal Account</button>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-5">
-                <div id="phone-preview" class="mx-auto w-[320px] h-[640px] bg-slate-900 rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+                <div id="phone-preview" class="mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col">
                     <div class="flex-1 overflow-y-auto scrollbar-hide p-8 text-center flex flex-col items-center">
-                        <div class="relative inline-block mb-4">
-                            <img id="preview-img" src="" class="w-24 h-24 rounded-full border-4 border-white/10 object-cover shadow-xl bg-slate-800">
+                        <div class="relative mb-4 mt-6">
+                            <img id="preview-img" class="w-24 h-24 rounded-full border-4 border-white/10 shadow-xl object-cover bg-slate-700">
                             <div id="preview-v-badge" class="hidden absolute -right-1 bottom-0">
                                 <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>
                             </div>
                         </div>
-                        <h2 id="preview-name" class="text-white font-black text-xl tracking-tight mb-1"></h2>
-                        <p id="preview-bio" class="text-xs text-slate-300 px-4 leading-relaxed mb-8 opacity-80"></p>
-                        <div id="preview-socials" class="flex justify-center gap-4 mb-8 text-white/60"></div>
-                        <div id="preview-links-container" class="w-full space-y-4"></div>
-                    </div>
-                    <div class="py-4 bg-black/20 text-center">
-                        <span class="text-[9px] text-white/40 font-black tracking-widest uppercase">LinkStack</span>
+                        <h2 id="preview-name" class="font-black text-xl mb-1"></h2>
+                        <p id="preview-bio" class="text-[11px] opacity-80 px-4 mb-8"></p>
+                        <div id="preview-links" class="w-full space-y-3"></div>
                     </div>
                 </div>
             </div>
@@ -179,212 +162,184 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentUserId = null;
-        let isBusinessUser = false;
-        let linkCount = 0;
+        let currentUser = null;
+        let selectedTheme = 'default';
+        let visitChart = null;
+
+        const themeConfig = {
+            default: { bg: '#0f172a', btn: 'bg-white/10 text-white', text: 'text-white' },
+            sunset: { bg: 'linear-gradient(135deg, #fb923c, #db2777)', btn: 'bg-white text-orange-600', text: 'text-white' },
+            forest: { bg: '#064e3b', btn: 'bg-emerald-500 text-white', text: 'text-emerald-50' },
+            cotton: { bg: '#fdf2f8', btn: 'bg-pink-500 text-white', text: 'text-pink-900' },
+            glass: { bg: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe) center/cover', btn: 'bg-white/20 backdrop-blur-md text-white border border-white/30', text: 'text-white' }
+        };
 
         async function init() {
-            feather.replace();
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                currentUserId = session.user.id;
-                document.getElementById('logout-btn').classList.remove('hidden');
-                loadData();
-            } else {
-                window.location.href = '/';
-            }
+            if (!session) return window.location.href = '/';
+            currentUser = session.user;
+            document.getElementById('logout-btn').classList.remove('hidden');
+            await loadAll();
         }
 
-        async function loadData() {
-            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUserId).single();
-            const { count } = await supabaseClient.from('links').select('*', { count: 'exact', head: true }).eq('user_id', currentUserId);
+        async function loadAll() {
+            const { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+            const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUser.id);
             
-            linkCount = count || 0;
-
-            if (profile) {
-                isBusinessUser = profile.is_business === true;
-                const handle = profile.handle || '';
-                const bio = profile.bio || '';
-                const avatar = profile.avatar_url || '';
-                
-                const fullUrl = `https://link-stack.pages.dev/?u=${handle || 'yourname'}`;
-                document.getElementById('public-url-display').innerText = fullUrl;
-                document.getElementById('profile-handle').value = handle;
-                document.getElementById('profile-avatar-url').value = avatar;
-                document.getElementById('profile-bio').value = bio;
-                document.getElementById('profile-bg').value = profile.bg_color || '#0f172a';
-                
-                document.getElementById('preview-name').innerText = handle ? `@${handle}` : '@yourname';
-                document.getElementById('preview-img').src = avatar || `https://ui-avatars.com/api/?name=${handle || 'U'}`;
-                document.getElementById('preview-bio').innerText = bio;
-                document.getElementById('phone-preview').style.backgroundColor = profile.bg_color || '#0f172a';
-
-                updateVerificationLogic(profile, linkCount);
-
-                document.getElementById('pro-social-fields').classList.toggle('hidden', !isBusinessUser);
-                document.getElementById('upgrade-social-promo').classList.toggle('hidden', isBusinessUser);
-                document.getElementById('biz-status-pill').classList.toggle('hidden', !isBusinessUser);
-                document.getElementById('personal-upsell').classList.toggle('hidden', isBusinessUser);
-                document.getElementById('business-stats').classList.toggle('hidden', !isBusinessUser);
-
-                document.getElementById('social-ig').value = profile.ig_handle || '';
-                document.getElementById('social-tw').value = profile.tw_handle || '';
-                if(isBusinessUser) {
-                    document.getElementById('social-li').value = profile.li_handle || '';
-                    document.getElementById('social-yt').value = profile.yt_handle || '';
-                    document.getElementById('social-wa').value = profile.wa_handle || '';
-                    document.getElementById('total-visits').innerText = profile.page_visits || 0;
-                }
-
-                const sCont = document.getElementById('preview-socials');
-                sCont.innerHTML = '';
-                if(profile.ig_handle) sCont.innerHTML += `<i data-feather="instagram" class="w-5 h-5"></i>`;
-                if(profile.tw_handle) sCont.innerHTML += `<i data-feather="twitter" class="w-5 h-5"></i>`;
-                if(isBusinessUser && profile.li_handle) sCont.innerHTML += `<i data-feather="linkedin" class="w-5 h-5"></i>`;
-                if(isBusinessUser && profile.wa_handle) sCont.innerHTML += `<i data-feather="message-circle" class="w-5 h-5"></i>`;
-                
-                feather.replace();
-            }
-            loadLinks();
+            selectedTheme = p.theme_id || 'default';
+            updatePreview(p, links);
+            updateForms(p, links);
+            if (p.is_business) loadAnalytics();
+            feather.replace();
         }
 
-        async function updateVerificationLogic(p, count) {
-            const criteria = {
+        function updateForms(p, links) {
+            document.getElementById('profile-handle').value = p.handle || '';
+            document.getElementById('profile-avatar-url').value = p.avatar_url || '';
+            document.getElementById('profile-bio').value = p.bio || '';
+            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
+            
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('theme-' + selectedTheme).classList.add('active');
+
+            document.getElementById('pro-social-fields').classList.toggle('hidden', !p.is_business);
+            document.getElementById('biz-promo').classList.toggle('hidden', p.is_business);
+            
+            const list = document.getElementById('links-editor-list');
+            list.innerHTML = links.map(l => `
+                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border">
+                    <div class="truncate"><p class="font-bold text-sm">${l.label}</p></div>
+                    <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            feather.replace();
+        }
+
+        function updatePreview(p, links) {
+            const theme = themeConfig[selectedTheme];
+            const preview = document.getElementById('phone-preview');
+            preview.style.background = theme.bg;
+            preview.className = `mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col ${theme.text}`;
+            
+            document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
+            document.getElementById('preview-bio').innerText = p.bio || '';
+            document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
+            
+            const linksCont = document.getElementById('preview-links');
+            linksCont.innerHTML = links.map(l => `<div class="p-4 rounded-2xl font-black text-sm text-center shadow-sm ${theme.btn}">${l.label}</div>`).join('');
+
+            checkVerification(p, links.length);
+        }
+
+        async function checkVerification(p, count) {
+            const v = {
                 biz: p.is_business === true,
-                handle: !!p.handle && p.handle.length > 2,
-                bio: !!p.bio && p.bio.length > 5,
-                avatar: !!p.avatar_url,
+                handle: !!p.handle && p.handle.length > 1,
+                bio: !!p.bio && p.bio.length > 2,
+                avatar: !!p.avatar_url && p.avatar_url.includes('http'),
                 links: count >= 2
             };
 
-            const isEligible = Object.values(criteria).every(v => v === true);
+            const isEligible = Object.values(v).every(Boolean);
+            document.getElementById('preview-v-badge').classList.toggle('hidden', !isEligible);
 
-            const updateItem = (id, met) => {
+            const badge = document.getElementById('v-status-badge');
+            badge.innerText = isEligible ? 'Verified' : 'Pending';
+            badge.className = isEligible ? 'px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-green-100 text-green-600' : 'px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-amber-100 text-amber-600';
+
+            const step = (id, ok) => {
                 const el = document.getElementById(id);
-                el.className = met ? 'flex items-center gap-3 text-sm text-green-600 font-bold' : 'flex items-center gap-3 text-sm text-slate-400';
-                el.querySelector('i').setAttribute('data-feather', met ? 'check-circle' : 'circle');
+                el.className = ok ? 'flex gap-3 items-center text-xs font-bold text-green-600' : 'flex gap-3 items-center text-xs font-bold text-slate-300';
+                el.querySelector('i').setAttribute('data-feather', ok ? 'check-circle' : 'circle');
             };
 
-            updateItem('check-biz', criteria.biz);
-            updateItem('check-handle', criteria.handle);
-            updateItem('check-bio', criteria.bio);
-            updateItem('check-avatar', criteria.avatar);
-            updateItem('check-links', criteria.links);
+            step('v-biz', v.biz); step('v-handle', v.handle); step('v-bio', v.bio); step('v-avatar', v.avatar); step('v-links', v.links);
             feather.replace();
 
-            const indicator = document.getElementById('v-status-indicator');
-            if(isEligible) {
-                indicator.innerText = "Verified Account";
-                indicator.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-green-50 text-green-600 border border-green-100";
-                document.getElementById('preview-v-badge').classList.remove('hidden');
-            } else {
-                indicator.innerText = "Pending Verification";
-                indicator.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100";
-                document.getElementById('preview-v-badge').classList.add('hidden');
-            }
-
-            if(p.is_verified !== isEligible) {
-                await supabaseClient.from('profiles').update({ is_verified: isEligible }).eq('id', currentUserId);
+            if (p.is_verified !== isEligible) {
+                await supabaseClient.from('profiles').update({ is_verified: isEligible }).eq('id', currentUser.id);
             }
         }
 
-        async function loadLinks() {
-            const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUserId).order('created_at', { ascending: false });
-            const list = document.getElementById('links-editor-list');
-            const preview = document.getElementById('preview-links-container');
-            
-            list.innerHTML = '';
-            preview.innerHTML = '';
-
-            links?.forEach(l => {
-                list.innerHTML += `
-                    <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="truncate mr-4">
-                            <p class="font-black text-sm">${l.label}</p>
-                            <p class="text-[10px] text-slate-400 truncate">${l.url}</p>
-                        </div>
-                        <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i data-feather="trash-2" class="w-4 h-4"></i></button>
-                    </div>`;
-                preview.innerHTML += `
-                    <div class="w-full p-4 bg-white/10 border border-white/20 rounded-2xl text-white font-black text-sm">
-                        ${l.label}
-                    </div>`;
-            });
-            feather.replace();
+        function setTheme(id) {
+            selectedTheme = id;
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('theme-' + id).classList.add('active');
+            loadAll();
         }
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
-            const handleInput = document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, '');
             const updates = {
-                handle: handleInput,
+                handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''),
                 avatar_url: document.getElementById('profile-avatar-url').value,
                 bio: document.getElementById('profile-bio').value,
-                bg_color: document.getElementById('profile-bg').value
+                theme_id: selectedTheme
             };
-            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUserId);
-            if (!error) loadData();
-            else showModal("Error", "That handle is already taken.");
+            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
+            if (!error) { showModal("Success", "Profile appearance updated!"); loadAll(); }
+            else showModal("Error", "Handle might be taken.");
         });
-
-        document.getElementById('save-socials-btn').addEventListener('click', async () => {
-            const updates = {
-                ig_handle: document.getElementById('social-ig').value,
-                tw_handle: document.getElementById('social-tw').value
-            };
-            if(isBusinessUser) {
-                updates.li_handle = document.getElementById('social-li').value;
-                updates.yt_handle = document.getElementById('social-yt').value;
-                updates.wa_handle = document.getElementById('social-wa').value;
-            }
-            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUserId);
-            if (!error) {
-                loadData();
-                showModal("Success", "Social connections updated.");
-            }
-        });
-
-        async function toggleBusiness(status) {
-            const { error } = await supabaseClient.from('profiles').update({ is_business: status }).eq('id', currentUserId);
-            if (!error) loadData();
-        }
 
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const label = document.getElementById('link-label').value;
             const url = document.getElementById('link-url').value;
             if(!label || !url) return;
-            await supabaseClient.from('links').insert([{ user_id: currentUserId, label, url }]);
+            await supabaseClient.from('links').insert([{ user_id: currentUser.id, label, url }]);
             document.getElementById('link-label').value = '';
             document.getElementById('link-url').value = '';
-            loadData();
+            loadAll();
         });
 
         async function deleteLink(id) {
             await supabaseClient.from('links').delete().eq('id', id);
-            loadData();
+            loadAll();
         }
 
-        function copyPublicLink() {
-            const url = document.getElementById('public-url-display').innerText;
-            navigator.clipboard.writeText(url);
-            showModal("Copied", "Link copied to clipboard!");
+        async function loadAnalytics() {
+            const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
+            const countries = {};
+            visits?.forEach(v => countries[v.country_code] = (countries[v.country_code] || 0) + 1);
+            const mapData = Object.entries(countries).map(([c, val]) => [c.toLowerCase(), val]);
+
+            Highcharts.mapChart('world-map', {
+                chart: { backgroundColor: 'transparent' },
+                title: { text: null },
+                credits: { enabled: false },
+                series: [{ data: mapData, name: 'Visits', states: { hover: { color: '#6366f1' } } }]
+            });
+
+            if (visitChart) visitChart.destroy();
+            const ctx = document.getElementById('visitsChart').getContext('2d');
+            visitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Weekly Visits', data: [5, 12, 8, 15, 22, 18, 25], borderColor: '#6366f1', tension: 0.4 }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         }
 
         function switchTab(t) {
             ['links','style','social','business'].forEach(s => {
                 document.getElementById('section-'+s).classList.add('hidden');
-                document.getElementById('tab-'+s).classList.replace('active-tab', 'text-slate-400');
+                document.getElementById('tab-'+s).classList.remove('active-tab');
             });
             document.getElementById('section-'+t).classList.remove('hidden');
-            document.getElementById('tab-'+t).classList.replace('text-slate-400', 'active-tab');
+            document.getElementById('tab-'+t).classList.add('active-tab');
         }
 
+        function copyPublicLink() {
+            navigator.clipboard.writeText(document.getElementById('public-url-display').innerText);
+            showModal("Copied", "Link copied to clipboard!");
+        }
+
+        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
         function showModal(t, m) {
             document.getElementById('modal-title').innerText = t;
             document.getElementById('modal-message').innerText = m;
             document.getElementById('modal-container').classList.remove('hidden');
         }
-
-        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();

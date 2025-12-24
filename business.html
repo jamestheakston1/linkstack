@@ -31,30 +31,30 @@
             
             <div class="grid md:grid-cols-2 gap-6 mt-16 text-left">
                 <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="check-circle"></i></div>
+                    <h3 class="font-bold text-xl mb-2">Unlock Verification</h3>
+                    <p class="text-slate-600">Get the blue checkmark next to your name to build instant trust and authority with your audience.</p>
+                </div>
+                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="share-2"></i></div>
+                    <h3 class="font-bold text-xl mb-2">Pro Social Connections</h3>
+                    <p class="text-slate-600">Unlock professional integrations for LinkedIn, YouTube, and WhatsApp to connect your entire ecosystem.</p>
+                </div>
+                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="bar-chart-2"></i></div>
+                    <h3 class="font-bold text-xl mb-2">Deep Insights</h3>
+                    <p class="text-slate-600">Unlock more insights with detailed analytics on page visits, link clicks, and audience behavior.</p>
+                </div>
+                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
                     <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="trending-up"></i></div>
                     <h3 class="font-bold text-xl mb-2">Priority SEO</h3>
-                    <p class="text-slate-600">Get discovered faster with enhanced search engine indexing and metadata control.</p>
-                </div>
-                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="users"></i></div>
-                    <h3 class="font-bold text-xl mb-2">Team Access</h3>
-                    <p class="text-slate-600">Invite up to 3 collaborators to manage your links and view engagement data.</p>
-                </div>
-                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="shield"></i></div>
-                    <h3 class="font-bold text-xl mb-2">Business Badge</h3>
-                    <p class="text-slate-600">Exclusive "Verified Business" badge to build corporate trust with your audience.</p>
-                </div>
-                <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-feather="mail"></i></div>
-                    <h3 class="font-bold text-xl mb-2">Direct Contact</h3>
-                    <p class="text-slate-600">Add integrated contact forms directly to your link tree to capture leads.</p>
+                    <p class="text-slate-600">Get discovered faster with enhanced search engine indexing and metadata control for your profile.</p>
                 </div>
             </div>
 
             <div class="mt-16 p-10 bg-slate-900 rounded-[2.5rem] text-white">
                 <h2 class="text-3xl font-bold mb-4">Ready to transition?</h2>
-                <p class="text-slate-400 mb-8 max-w-lg mx-auto">Switching to a Business Account is free. You can revert back to a Personal account at any time from your settings.</p>
+                <p class="text-slate-400 mb-8 max-w-lg mx-auto">Switching to a Business Account unlocks all pro features instantly. You can revert back to a Personal account at any time.</p>
                 
                 <div id="auth-check-area">
                     <p class="text-amber-400 font-bold mb-4">Checking authentication...</p>
@@ -160,7 +160,11 @@
 
         async function performTransfer() {
             if (!currentUser) return;
-            const { error } = await supabaseClient.from('profiles').update({ is_business: true }).eq('id', currentUser.id);
+            const { error } = await supabaseClient.from('profiles').update({ 
+                is_business: true,
+                is_verified: true 
+            }).eq('id', currentUser.id);
+            
             if (error) {
                 alert("Error: " + error.message);
             } else {

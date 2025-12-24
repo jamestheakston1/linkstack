@@ -7,107 +7,123 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .hidden { display: none; }
+        .active-tab { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+        .checkmark { color: #3b82f6; width: 18px; height: 18px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
-    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="window.location.reload()">
+    <nav id="main-nav" class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="window.location.href='https://link-stack.pages.dev'">
             <i data-feather="layers"></i>
             <span>LinkStack</span>
         </div>
-        <div id="nav-actions">
-            <button id="logout-btn" class="hidden text-sm font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1 transition">
-                <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
-            </button>
+        <div id="nav-actions" class="flex items-center gap-4">
+            <div id="user-menu" class="hidden relative group cursor-pointer">
+                <img id="nav-avatar" src="https://ui-avatars.com/api/?name=User" class="w-10 h-10 rounded-full border-2 border-indigo-100 object-cover">
+                <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 hidden group-hover:block z-50">
+                    <button onclick="switchTab('verify')" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-2">
+                        <i data-feather="award" class="w-4 h-4"></i> Get Verified
+                    </button>
+                    <hr>
+                    <button id="logout-btn" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <section id="hero-section" class="pt-32 pb-20 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                One link to rule them all.
-            </h1>
-            <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-                The ultimate personal landing page for creators. Fast, secure, and password-protected.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button onclick="startApp()" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition transform hover:-translate-y-1">
-                    Get Started Now
-                </button>
-            </div>
-        </div>
-    </section>
+    <div id="landing-wrapper">
+        <section class="pt-40 pb-20 px-6 text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Your link, simplified.</h1>
+            <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">Upload your style, verify your identity, and share your world with a clean, short URL.</p>
+            <button onclick="startApp()" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 shadow-lg transition transform hover:-translate-y-1">Get Started</button>
+        </section>
+    </div>
 
-    <main id="app-container" class="hidden max-w-5xl mx-auto py-24 px-6">
+    <main id="app-container" class="hidden max-w-6xl mx-auto py-24 px-6">
         
         <section id="auth-view" class="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
-            <div class="text-center mb-8">
-                <h2 id="auth-title" class="text-2xl font-bold">Welcome Back</h2>
-                <p id="auth-subtitle" class="text-slate-500">Enter your details to access your stack.</p>
-            </div>
-            
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
-                    <input type="email" id="email" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="you@example.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Password</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="••••••••">
-                </div>
-                <button id="login-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">
-                    Sign In
-                </button>
-                <button id="signup-btn" class="w-full bg-white text-indigo-600 border border-indigo-100 font-bold py-3 rounded-xl hover:bg-indigo-50 transition">
-                    Create New Account
-                </button>
+                <input type="email" id="email" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Email">
+                <input type="password" id="password" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Password">
+                <button id="login-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl">Sign In</button>
+                <button id="signup-btn" class="w-full bg-white text-indigo-600 border border-indigo-100 font-bold py-3 rounded-xl">Create Account</button>
             </div>
         </section>
 
         <section id="dashboard-view" class="hidden grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-                <header class="mb-8">
-                    <h2 class="text-3xl font-bold">Manage Your Stack</h2>
-                    <p class="text-slate-500">Update your links in real-time.</p>
-                </header>
+            <div class="space-y-6">
+                <div class="flex border-b border-slate-200 mb-4">
+                    <button onclick="switchTab('links')" id="tab-links" class="px-6 py-2 font-bold active-tab">Links</button>
+                    <button onclick="switchTab('appearance')" id="tab-appearance" class="px-6 py-2 font-bold text-slate-400">Appearance</button>
+                    <button onclick="switchTab('verify')" id="tab-verify" class="px-6 py-2 font-bold text-slate-400">Verify</button>
+                </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6">
-                    <div>
-                        <label class="block text-sm font-bold mb-2">Link Title</label>
-                        <input type="text" id="link-label" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="My GitHub Portfolio">
+                <div id="section-links" class="space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="text-xl font-bold">Add New Link</h3>
+                        <input type="text" id="link-label" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="Link Title">
+                        <input type="url" id="link-url" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="URL">
+                        <button id="add-link-btn" class="w-full bg-slate-900 text-white py-2 rounded-lg font-bold">Add Link</button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-2">URL Address</label>
-                        <input type="url" id="link-url" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://github.com/yourname">
+                </div>
+
+                <div id="section-appearance" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="text-xl font-bold">Appearance</h3>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Handle</label>
+                            <input type="text" id="profile-handle" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="yourname">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Profile Picture</label>
+                            <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('avatar-upload').click()" class="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-slate-500 hover:border-indigo-400">Upload Image</button>
+                        </div>
+                        <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold">Save Changes</button>
                     </div>
-                    <button id="add-link-btn" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-indigo-950 transition flex items-center justify-center gap-2">
-                        <i data-feather="plus" class="w-5 h-5"></i> Add Link
-                    </button>
+                </div>
+
+                <div id="section-verify" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold mb-6">Verification Center</h3>
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center gap-3" id="crit-handle"><i data-feather="circle" class="w-5 h-5"></i><span>Set a unique handle</span></div>
+                            <div class="flex items-center gap-3" id="crit-avatar"><i data-feather="circle" class="w-5 h-5"></i><span>Upload a profile picture</span></div>
+                            <div class="flex items-center gap-3" id="crit-links"><i data-feather="circle" class="w-5 h-5"></i><span>Add 3 or more links</span></div>
+                        </div>
+                        <button id="real-verify-btn" disabled class="w-full bg-slate-200 text-slate-400 py-3 rounded-xl font-bold">Verify Now</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold mb-2">Your Public URL</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="public-url-display" readonly class="flex-1 bg-slate-50 px-4 py-2 rounded-lg text-sm font-mono">
+                        <button onclick="copyLink()" class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-feather="copy" class="w-4 h-4"></i></button>
+                    </div>
                 </div>
             </div>
 
             <div class="sticky top-28">
-                <div class="relative bg-slate-900 rounded-[3rem] h-[600px] w-full max-w-[300px] mx-auto overflow-hidden shadow-2xl border-[10px] border-slate-800">
-                    <div class="absolute top-0 w-full h-24 bg-gradient-to-b from-indigo-500/20 to-transparent"></div>
+                <div id="phone-preview" class="relative bg-slate-900 rounded-[3rem] h-[600px] w-full max-w-[300px] mx-auto overflow-hidden shadow-2xl border-[10px] border-slate-800">
                     <div class="relative z-10 flex flex-col items-center pt-12 px-6">
-                        <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-4 border border-white/20">
-                            <i data-feather="user" class="text-white w-10 h-10"></i>
+                        <img id="preview-avatar" src="https://ui-avatars.com/api/?name=?" class="w-24 h-24 rounded-full border-2 border-white/20 mb-4 object-cover">
+                        <div class="flex items-center justify-center gap-1 mb-8">
+                            <p id="preview-handle" class="text-xs font-bold text-slate-400 uppercase tracking-widest">User</p>
+                            <span id="verified-badge" class="hidden"><svg class="checkmark" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>
                         </div>
-                        <p id="user-display-email" class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-8"></p>
                         <div id="links-list" class="w-full space-y-4"></div>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
     <script>
@@ -115,105 +131,196 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const hero = document.getElementById('hero-section');
-        const appContainer = document.getElementById('app-container');
-        const authView = document.getElementById('auth-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const logoutBtn = document.getElementById('logout-btn');
-        const linksList = document.getElementById('links-list');
-        const userEmailDisplay = document.getElementById('user-display-email');
+        let currentProfile = null;
+        let currentLinksCount = 0;
 
-        function startApp() {
-            hero.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            checkUser();
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryUser = urlParams.get('u');
+            if (queryUser) showPublic(queryUser);
+            else checkUser();
+            feather.replace();
         }
 
         async function checkUser() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) showDashboard(session.user);
-            else showAuth();
+            if (session) setupDashboard(session.user);
         }
 
-        function showDashboard(user) {
-            hero.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            authView.classList.add('hidden');
-            dashboardView.classList.remove('hidden');
-            logoutBtn.classList.remove('hidden');
-            userEmailDisplay.innerText = user.email.split('@')[0];
+        function switchTab(tabId) {
+            ['links', 'appearance', 'verify'].forEach(t => {
+                document.getElementById('section-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('active-tab');
+                document.getElementById('tab-' + t).classList.add('text-slate-400');
+            });
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('active-tab');
+            document.getElementById('tab-' + tabId).classList.remove('text-slate-400');
+        }
+
+        async function setupDashboard(user) {
+            document.getElementById('landing-wrapper').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('user-menu').classList.remove('hidden');
+            await loadProfile(user.id);
             fetchLinks(user.id);
         }
 
-        function showAuth() {
-            authView.classList.remove('hidden');
-            dashboardView.classList.add('hidden');
-            logoutBtn.classList.add('hidden');
+        async function loadProfile(userId) {
+            const { data } = await supabaseClient.from('profiles').select('*').eq('id', userId).single();
+            if (data) {
+                currentProfile = data;
+                document.getElementById('profile-handle').value = data.handle || '';
+                document.getElementById('preview-handle').innerText = data.handle || 'User';
+                if(data.avatar_url) {
+                    const avatar = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
+                    document.getElementById('preview-avatar').src = avatar;
+                    document.getElementById('nav-avatar').src = avatar;
+                }
+                if(data.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
+                updateUrlDisplay(data, userId);
+            }
+            updateCriteria();
         }
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-        });
-
-        document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { data, error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert('Check your email to confirm registration, or try logging in if confirmation is disabled!');
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            window.location.reload();
-        });
-
-        async function fetchLinks(userId) {
-            const { data, error } = await supabaseClient
-                .from('links')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: true });
-
-            if (data) renderLinks(data);
+        function updateUrlDisplay(profile, userId) {
+            const { data: { user } } = supabaseClient.auth.getSession();
+            const emailPart = currentProfile?.handle || (currentProfile?.email || 'user').split('@')[0];
+            document.getElementById('public-url-display').value = `https://link-stack.pages.dev/?u=${emailPart}`;
         }
 
-        function renderLinks(links) {
-            linksList.innerHTML = links.map(link => `
-                <a href="${link.url}" target="_blank" class="block w-full py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-center text-sm font-semibold text-white transition duration-300">
-                    ${link.label}
-                </a>
+        async function uploadAvatar() {
+            const file = document.getElementById('avatar-upload').files[0];
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const filePath = `${user.id}/${Date.now()}_${file.name}`;
+            const { error } = await supabaseClient.storage.from('avatars').upload(filePath, file);
+            if (!error) return filePath;
+            return null;
+        }
+
+        document.getElementById('save-profile-btn').addEventListener('click', async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            let avatarPath = currentProfile?.avatar_url;
+            if (document.getElementById('avatar-upload').files[0]) avatarPath = await uploadAvatar();
+            
+            const handle = document.getElementById('profile-handle').value;
+            await supabaseClient.from('profiles').upsert({ id: user.id, handle, avatar_url: avatarPath });
+            loadProfile(user.id);
+        });
+
+        function updateCriteria() {
+            const h = document.getElementById('profile-handle').value;
+            const a = currentProfile?.avatar_url;
+            const meetsAll = !!h && !!a && currentLinksCount >= 3;
+            
+            setCrit('crit-handle', !!h);
+            setCrit('crit-avatar', !!a);
+            setCrit('crit-links', currentLinksCount >= 3);
+
+            const vBtn = document.getElementById('real-verify-btn');
+            if(meetsAll && !currentProfile?.is_verified) {
+                vBtn.disabled = false;
+                vBtn.classList.remove('bg-slate-200', 'text-slate-400');
+                vBtn.classList.add('bg-indigo-600', 'text-white');
+                vBtn.onclick = grantVerification;
+            }
+        }
+
+        function setCrit(id, met) {
+            const el = document.getElementById(id);
+            el.className = met ? "flex items-center gap-3 text-green-600 font-bold" : "flex items-center gap-3 text-slate-400";
+            el.querySelector('i').dataset.feather = met ? "check-circle" : "circle";
+            feather.replace();
+        }
+
+        async function grantVerification() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', user.id);
+            loadProfile(user.id);
+        }
+
+        async function fetchLinks(userId, isPublic = false) {
+            const { data } = await supabaseClient.from('links').select('*').eq('user_id', userId).order('created_at');
+            currentLinksCount = data?.length || 0;
+            renderLinks(data || [], isPublic);
+            if(!isPublic) updateCriteria();
+        }
+
+        function renderLinks(links, isPublic) {
+            document.getElementById('links-list').innerHTML = links.map(l => `
+                <div class="group relative">
+                    <a href="${l.url}" target="_blank" class="block py-3 px-4 bg-white/10 border border-white/10 rounded-2xl text-center text-sm font-semibold text-white transition hover:bg-white/20">${l.label}</a>
+                    ${!isPublic ? `<button onclick="deleteLink('${l.id}')" class="absolute -right-2 -top-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"><i data-feather="x" class="w-3 h-3"></i></button>` : ''}
+                </div>
             `).join('');
             feather.replace();
+        }
+
+        async function deleteLink(id) {
+            await supabaseClient.from('links').delete().eq('id', id);
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            fetchLinks(user.id);
+        }
+        window.deleteLink = deleteLink;
+
+        async function showPublic(query) {
+            document.getElementById('landing-wrapper').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.querySelector('#dashboard-view > div:first-child').classList.add('hidden');
+            
+            const phone = document.getElementById('phone-preview');
+            phone.classList.remove('max-w-[300px]', 'h-[600px]', 'rounded-[3rem]', 'border-[10px]');
+            phone.classList.add('fixed', 'inset-0', 'max-w-full', 'h-screen', 'rounded-none', 'border-0');
+
+            let userId;
+            const { data: profileByHandle } = await supabaseClient.from('profiles').select('id').eq('handle', query).single();
+            if (profileByHandle) userId = profileByHandle.id;
+            else {
+                const { data: profileById } = await supabaseClient.from('profiles').select('id').eq('id', query).single();
+                userId = profileById?.id;
+            }
+
+            if (userId) {
+                const { data } = await supabaseClient.from('profiles').select('*').eq('id', userId).single();
+                document.getElementById('preview-handle').innerText = data.handle || 'User';
+                if(data.avatar_url) document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
+                if(data.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
+                fetchLinks(userId, true);
+            }
         }
 
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const label = document.getElementById('link-label').value;
             const url = document.getElementById('link-url').value;
             const { data: { user } } = await supabaseClient.auth.getUser();
-
-            if(!label || !url) return alert('Please fill both fields');
-
-            const { error } = await supabaseClient
-                .from('links')
-                .insert([{ label, url, user_id: user.id }]);
-
-            if (!error) {
-                document.getElementById('link-label').value = '';
-                document.getElementById('link-url').value = '';
-                fetchLinks(user.id);
-            }
+            await supabaseClient.from('links').insert([{ label, url, user_id: user.id }]);
+            fetchLinks(user.id);
+            document.getElementById('link-label').value = '';
+            document.getElementById('link-url').value = '';
         });
 
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN') showDashboard(session.user);
-            if (event === 'SIGNED_OUT') window.location.reload();
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message); else setupDashboard(data.user);
         });
 
-        feather.replace();
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) alert(error.message); else alert("Account created!");
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => { supabaseClient.auth.signOut(); window.location.reload(); });
+        function copyLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').value); alert("Copied!"); }
+        function startApp() { document.getElementById('landing-wrapper').classList.add('hidden'); document.getElementById('app-container').classList.remove('hidden'); }
+
+        init();
     </script>
 </body>
 </html>

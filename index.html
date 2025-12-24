@@ -7,18 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .hidden { display: none !important; }
         .active-tab { border-bottom: 2px solid #6366f1; color: #6366f1; }
-        .checkmark { color: #3b82f6; width: 18px; height: 18px; }
         #phone-preview { transition: background 0.4s ease; }
+        .modal-bg { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+        .business-badge { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
+    <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <div id="modal-icon" class="mx-auto w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+                <i data-feather="info"></i>
+            </div>
+            <h3 id="modal-title" class="text-xl font-bold mb-2">Notice</h3>
+            <p id="modal-message" class="text-slate-600 mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl">Got it</button>
+        </div>
+    </div>
+
     <nav id="main-nav" class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="window.location.href=window.location.origin + window.location.pathname">
+        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="location.reload()">
             <i data-feather="layers"></i>
             <span>LinkStack</span>
         </div>
@@ -33,28 +46,8 @@
         <section class="pt-48 pb-32 px-6 text-center bg-gradient-to-b from-indigo-50 to-white">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter text-slate-900 leading-tight">Your world, <br><span class="text-indigo-600">one link.</span></h1>
-                <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Create a beautiful, verified landing page for your brand in seconds. Track clicks and customize your style.</p>
-                <button onclick="startApp()" class="px-10 py-5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-2xl transition transform hover:-translate-y-1">Get Started Free</button>
-            </div>
-        </section>
-        
-        <section class="py-20 bg-white">
-            <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-                <div class="p-8 bg-slate-50 rounded-3xl">
-                    <i data-feather="bar-chart" class="text-indigo-600 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Detailed Analytics</h3>
-                    <p class="text-slate-600">Know exactly which links your audience is clicking with real-time tracking.</p>
-                </div>
-                <div class="p-8 bg-slate-50 rounded-3xl">
-                    <i data-feather="check-circle" class="text-indigo-600 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Verified Badges</h3>
-                    <p class="text-slate-600">Build trust with your community using our automated verification system.</p>
-                </div>
-                <div class="p-8 bg-slate-50 rounded-3xl">
-                    <i data-feather="palette" class="text-indigo-600 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Full Customization</h3>
-                    <p class="text-slate-600">Match your brand with custom colors, handles, and social integrations.</p>
-                </div>
+                <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Create a beautiful landing page. Track clicks with visuals.</p>
+                <button onclick="startApp()" class="px-10 py-5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-2xl transition transform hover:-translate-y-1">Get Started</button>
             </div>
         </section>
     </div>
@@ -62,8 +55,8 @@
     <main id="app-container" class="hidden max-w-6xl mx-auto py-24 px-6">
         <section id="auth-view" class="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
             <div class="space-y-4">
-                <input type="email" id="email" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Email">
-                <input type="password" id="password" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Password">
+                <input type="email" id="email" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Email">
+                <input type="password" id="password" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Password">
                 <button id="login-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl">Sign In</button>
                 <button id="signup-btn" class="w-full bg-white text-indigo-600 border border-indigo-100 font-bold py-3 rounded-xl">Create Account</button>
             </div>
@@ -71,51 +64,44 @@
 
         <section id="dashboard-view" class="hidden grid lg:grid-cols-2 gap-12 items-start">
             <div class="space-y-6">
-                <div class="flex border-b border-slate-200 mb-4 sticky top-20 bg-slate-50/80 backdrop-blur z-20">
-                    <button onclick="switchTab('links')" id="tab-links" class="px-6 py-4 font-bold active-tab">Links</button>
-                    <button onclick="switchTab('appearance')" id="tab-appearance" class="px-6 py-4 font-bold text-slate-400">Style</button>
-                    <button onclick="switchTab('analytics')" id="tab-analytics" class="px-6 py-4 font-bold text-slate-400">Analytics</button>
-                    <button onclick="switchTab('verify')" id="tab-verify" class="px-6 py-4 font-bold text-slate-400">Verify</button>
+                <div class="flex border-b border-slate-200 mb-4 sticky top-20 bg-slate-50/80 backdrop-blur z-20 overflow-x-auto">
+                    <button onclick="switchTab('links')" id="tab-links" class="px-6 py-4 font-bold active-tab whitespace-nowrap">Links</button>
+                    <button onclick="switchTab('appearance')" id="tab-appearance" class="px-6 py-4 font-bold text-slate-400 whitespace-nowrap">Style</button>
+                    <button onclick="switchTab('analytics')" id="tab-analytics" class="px-6 py-4 font-bold text-slate-400 whitespace-nowrap">Analytics</button>
+                    <button onclick="switchTab('business')" id="tab-business" class="px-6 py-4 font-bold text-slate-400 whitespace-nowrap">Business</button>
+                    <button onclick="switchTab('verify')" id="tab-verify" class="px-6 py-4 font-bold text-slate-400 whitespace-nowrap">Verify</button>
                 </div>
 
                 <div id="section-links" class="space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-xl font-bold">Add Link</h3>
-                        <input type="text" id="link-label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Link Name (e.g. My Website)">
-                        <input type="url" id="link-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="URL (e.g. https://...)">
-                        <button id="add-link-btn" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-black transition">Add Link</button>
+                        <input type="text" id="link-label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Link Title">
+                        <input type="url" id="link-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="https://...">
+                        <button id="add-link-btn" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold">Add Link</button>
                     </div>
                 </div>
 
                 <div id="section-appearance" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6">
-                        <h3 class="text-xl font-bold">Identity & Style</h3>
+                        <h3 class="text-xl font-bold">Identity</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Handle</label>
-                                <input type="text" id="profile-handle" class="w-full px-4 py-2 bg-slate-50 border rounded-lg focus:ring-2 ring-indigo-100 outline-none" placeholder="yourhandle">
+                                <input type="text" id="profile-handle" oninput="updatePreviewHandle(this.value)" class="w-full px-4 py-2 bg-slate-50 border rounded-lg outline-none" placeholder="handle">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">BG Color</label>
-                                <input type="color" id="profile-bg" oninput="updatePreviewBg(this.value)" class="w-full h-10 p-1 bg-white border rounded-lg cursor-pointer">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Twitter</label>
-                                <input type="text" id="social-twitter" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@username">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Instagram</label>
-                                <input type="text" id="social-instagram" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@username">
+                                <input type="color" id="profile-bg" oninput="updatePreviewBg(this.value)" class="w-full h-10 p-1 bg-white border rounded-lg">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Profile Image</label>
-                            <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="handleFileSelected()">
-                            <button id="upload-trigger" onclick="document.getElementById('avatar-upload').click()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-indigo-400 transition flex items-center justify-center gap-2">
-                                <i data-feather="upload-cloud"></i> <span id="upload-status-text">Choose Image</span>
-                            </button>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Bio / Description</label>
+                            <textarea id="profile-bio" oninput="updatePreviewBio(this.value)" class="w-full px-4 py-2 bg-slate-50 border rounded-lg outline-none h-24" placeholder="Tell your story..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Avatar</label>
+                            <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('avatar-upload').click()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-indigo-400 transition">Change Photo</button>
                         </div>
                         <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-indigo-100">Save Changes</button>
                     </div>
@@ -123,41 +109,84 @@
 
                 <div id="section-analytics" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="text-xl font-bold mb-6">Performance</h3>
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold">Engagement</h3>
+                            <div class="text-right">
+                                <span id="total-visits" class="block text-2xl font-black text-indigo-600">0</span>
+                                <span class="text-xs text-slate-400 uppercase font-bold">Page Visits</span>
+                            </div>
+                        </div>
+                        <div class="mb-8 h-64"><canvas id="clicksChart"></canvas></div>
                         <div class="space-y-3" id="analytics-list"></div>
+                    </div>
+                </div>
+
+                <div id="section-business" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
+                        <div id="business-status-active" class="hidden">
+                            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-feather="briefcase"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2">Business Account Active</h3>
+                            <p class="text-slate-600 mb-8">You have access to professional SEO and team collaboration features.</p>
+                            <button onclick="toggleBusiness(false)" class="text-sm font-bold text-red-600 hover:underline">Switch to Personal</button>
+                        </div>
+                        <div id="business-status-inactive">
+                            <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-feather="briefcase"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2">Go Professional</h3>
+                            <p class="text-slate-600 mb-8">Unlock priority SEO, team access, and more by switching to a Business account.</p>
+                            <a href="/business" class="inline-block px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 transition transform hover:-translate-y-1">Explore Business</a>
+                        </div>
                     </div>
                 </div>
 
                 <div id="section-verify" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="text-xl font-bold mb-6">Verification Progress</h3>
+                        <h3 class="text-xl font-bold mb-6">Verification</h3>
                         <div class="space-y-4 mb-8">
-                            <div id="crit-handle" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>Unique handle set</span></div>
-                            <div id="crit-avatar" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>Profile picture uploaded</span></div>
-                            <div id="crit-links" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>At least 3 links added</span></div>
+                            <div id="crit-handle" class="flex items-center gap-3"><i data-feather="circle"></i><span>Unique handle set</span></div>
+                            <div id="crit-avatar" class="flex items-center gap-3"><i data-feather="circle"></i><span>Profile picture uploaded</span></div>
+                            <div id="crit-links" class="flex items-center gap-3"><i data-feather="circle"></i><span>3+ links added</span></div>
+                            <div id="crit-business" class="flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <i data-feather="circle"></i><span>Business Account</span>
+                                </div>
+                                <a href="/business" target="_blank" class="text-indigo-600 opacity-0 group-hover:opacity-100 transition"><i data-feather="external-link" class="w-4 h-4"></i></a>
+                            </div>
                         </div>
                         <button id="real-verify-btn" disabled class="w-full bg-slate-100 text-slate-400 py-4 rounded-xl font-bold cursor-not-allowed">Verify Now</button>
                     </div>
                 </div>
 
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase mb-2">Your Public Link</h3>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase mb-2">Public Link</h3>
                     <div class="flex items-center gap-2">
                         <input type="text" id="public-url-display" readonly class="flex-1 bg-slate-50 px-4 py-2 rounded-lg text-sm font-mono border-none outline-none">
-                        <button onclick="copyLink()" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition"><i data-feather="copy" class="w-4 h-4"></i></button>
+                        <button onclick="copyLink()" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-feather="copy" class="w-4 h-4"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="sticky top-28">
                 <div id="phone-preview" class="relative bg-slate-900 rounded-[3rem] h-[600px] w-full max-w-[300px] mx-auto overflow-hidden shadow-2xl border-[10px] border-slate-800">
-                    <div class="relative z-10 flex flex-col items-center pt-12 px-6">
+                    <div class="relative z-10 flex flex-col items-center pt-12 px-6 text-center">
                         <img id="preview-avatar" src="https://ui-avatars.com/api/?name=?" class="w-24 h-24 rounded-full border-4 border-white/10 mb-4 object-cover">
-                        <div class="flex items-center justify-center gap-1 mb-4">
+                        
+                        <div class="flex items-center justify-center gap-1 mb-1">
                             <p id="preview-handle" class="text-xs font-bold text-white uppercase tracking-widest opacity-80">User</p>
-                            <span id="verified-badge" class="hidden"><svg class="checkmark" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>
+                            <span id="verified-badge" class="hidden"><svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>
                         </div>
-                        <div id="socials-preview" class="flex gap-4 mb-8"></div>
+
+                        <div id="preview-business-tag" class="hidden mb-3">
+                            <span class="text-[10px] font-black text-indigo-300 uppercase tracking-tighter px-2 py-0.5 rounded-full business-badge flex items-center gap-1">
+                                <i data-feather="briefcase" class="w-2 h-2"></i> Business Account
+                            </span>
+                        </div>
+
+                        <p id="preview-bio" class="text-sm text-slate-300 mb-8 px-4 leading-relaxed line-clamp-3 italic"></p>
+
                         <div id="links-list" class="w-full space-y-3"></div>
                     </div>
                 </div>
@@ -172,10 +201,13 @@
 
         let currentProfile = null;
         let currentLinksCount = 0;
+        let chartInstance = null;
 
         async function init() {
             const urlParams = new URLSearchParams(window.location.search);
             const queryUser = urlParams.get('u');
+            if (urlParams.get('status') === 'business_activated') showModal("Success", "Business account activated!");
+            
             if (queryUser) showPublic(queryUser);
             else checkUser();
             feather.replace();
@@ -186,8 +218,16 @@
             if (data?.session) setupDashboard(data.session.user);
         }
 
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('modal-container').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
+
         function switchTab(tabId) {
-            ['links', 'appearance', 'analytics', 'verify'].forEach(t => {
+            ['links', 'appearance', 'analytics', 'verify', 'business'].forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 const tab = document.getElementById('tab-' + t);
                 if(sec) sec.classList.add('hidden');
@@ -200,7 +240,6 @@
         }
 
         async function setupDashboard(user) {
-            if(!user) return;
             document.getElementById('landing-wrapper').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('auth-view').classList.add('hidden');
@@ -215,80 +254,62 @@
             if (data) {
                 currentProfile = data;
                 document.getElementById('profile-handle').value = data.handle || '';
+                updatePreviewHandle(data.handle || 'User');
+                
+                document.getElementById('profile-bio').value = data.bio || '';
+                updatePreviewBio(data.bio || '');
+
                 document.getElementById('profile-bg').value = data.bg_color || '#0f172a';
                 updatePreviewBg(data.bg_color || '#0f172a');
+                document.getElementById('total-visits').innerText = data.page_visits || 0;
                 
-                const socials = data.socials || {};
-                document.getElementById('social-twitter').value = socials.twitter || '';
-                document.getElementById('social-instagram').value = socials.instagram || '';
-                renderSocials(socials);
+                document.getElementById('business-status-active').classList.toggle('hidden', !data.is_business);
+                document.getElementById('business-status-inactive').classList.toggle('hidden', !!data.is_business);
+                document.getElementById('preview-business-tag').classList.toggle('hidden', !data.is_business);
 
-                if(data.avatar_url) {
-                    const avatar = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
-                    document.getElementById('preview-avatar').src = avatar;
-                    document.getElementById('upload-status-text').innerText = "Image Uploaded!";
-                }
+                if(data.avatar_url) document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
                 if(data.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
                 updateUrlDisplay(data);
+                feather.replace();
             }
             updateCriteria();
         }
 
-        function handleFileSelected() {
-            const file = document.getElementById('avatar-upload').files[0];
-            if(file) document.getElementById('upload-status-text').innerText = "Selected: " + file.name;
+        async function toggleBusiness(status) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            await supabaseClient.from('profiles').update({ is_business: status }).eq('id', user.id);
+            await loadProfile(user.id);
+            showModal("Account Updated", status ? "Switched to Business" : "Switched to Personal");
         }
 
-        function updatePreviewBg(color) {
-            const preview = document.getElementById('phone-preview');
-            if(preview) preview.style.backgroundColor = color;
-        }
-
-        function renderSocials(socials) {
-            const container = document.getElementById('socials-preview');
-            if(!container) return;
-            container.innerHTML = '';
-            Object.entries(socials).forEach(([platform, handle]) => {
-                if(handle && handle.trim() !== '') {
-                    const icon = document.createElement('div');
-                    icon.className = 'w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition';
-                    icon.innerHTML = `<i data-feather="${platform}" class="w-4 h-4"></i>`;
-                    container.appendChild(icon);
-                }
-            });
-            feather.replace();
-        }
+        function updatePreviewHandle(val) { document.getElementById('preview-handle').innerText = val || 'User'; }
+        function updatePreviewBio(val) { document.getElementById('preview-bio').innerText = val; }
+        function updatePreviewBg(color) { document.getElementById('phone-preview').style.backgroundColor = color; }
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if(!user) return;
-            
             const handle = document.getElementById('profile-handle').value;
+            const bio = document.getElementById('profile-bio').value;
             const bg_color = document.getElementById('profile-bg').value;
-            const socials = {
-                twitter: document.getElementById('social-twitter').value,
-                instagram: document.getElementById('social-instagram').value
-            };
-            
             let avatarPath = currentProfile?.avatar_url;
+            
             const fileInput = document.getElementById('avatar-upload');
             if (fileInput.files.length) {
                 const file = fileInput.files[0];
                 const path = `${user.id}/${Date.now()}_${file.name}`;
-                const { error } = await supabaseClient.storage.from('avatars').upload(path, file);
-                if(!error) avatarPath = path;
+                await supabaseClient.storage.from('avatars').upload(path, file);
+                avatarPath = path;
             }
 
-            await supabaseClient.from('profiles').upsert({ id: user.id, handle, bg_color, socials, avatar_url: avatarPath });
+            await supabaseClient.from('profiles').upsert({ id: user.id, handle, bio, bg_color, avatar_url: avatarPath });
             await loadProfile(user.id);
-            alert("Profile updated successfully.");
+            showModal("Saved", "Profile updated.");
         });
 
         async function fetchLinks(userId, isPublic = false) {
             const { data } = await supabaseClient.from('links').select('*').eq('user_id', userId).order('created_at');
             currentLinksCount = data?.length || 0;
             const container = document.getElementById('links-list');
-            if(!container) return;
             container.innerHTML = (data || []).map(l => `
                 <div class="group relative">
                     <a href="${l.url}" onclick="trackClick('${l.id}', '${userId}')" target="_blank" class="block py-4 px-4 bg-white/10 border border-white/10 rounded-2xl text-center text-sm font-bold text-white transition hover:scale-[1.02]">${l.label}</a>
@@ -305,43 +326,51 @@
 
         async function fetchAnalytics() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if(!user) return;
             const { data: links } = await supabaseClient.from('links').select('id, label').eq('user_id', user.id);
             const { data: clicks } = await supabaseClient.from('link_clicks').select('link_id').eq('user_id', user.id);
             
+            const labels = [];
+            const counts = [];
             const listEl = document.getElementById('analytics-list');
-            if(!listEl) return;
+
             listEl.innerHTML = links.map(l => {
                 const count = (clicks || []).filter(c => c.link_id === l.id).length;
+                labels.push(l.label);
+                counts.push(count);
                 return `<div class="flex justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                     <span class="font-bold">${l.label}</span>
                     <span class="text-indigo-600 font-black">${count} clicks</span>
                 </div>`;
-            }).join('') || '<p class="text-slate-400 italic">No links added yet.</p>';
+            }).join('') || '<p class="text-slate-400 italic">No data yet.</p>';
+
+            renderChart(labels, counts);
+        }
+
+        function renderChart(labels, counts) {
+            const ctx = document.getElementById('clicksChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Clicks', data: counts, backgroundColor: '#6366f1', borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         }
 
         function updateCriteria() {
-            const h = document.getElementById('profile-handle')?.value;
-            const a = currentProfile?.avatar_url;
-            
-            setCrit('crit-handle', !!h);
-            setCrit('crit-avatar', !!a);
+            setCrit('crit-handle', !!document.getElementById('profile-handle')?.value);
+            setCrit('crit-avatar', !!currentProfile?.avatar_url);
             setCrit('crit-links', currentLinksCount >= 3);
+            setCrit('crit-business', !!currentProfile?.is_business);
 
             const vBtn = document.getElementById('real-verify-btn');
-            if(vBtn) {
-                if(!!h && !!a && currentLinksCount >= 3 && !currentProfile?.is_verified) {
-                    vBtn.disabled = false;
-                    vBtn.className = "w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition transform hover:-translate-y-1";
-                    vBtn.onclick = async () => {
-                        const { data: { user } } = await supabaseClient.auth.getUser();
-                        await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', user.id);
-                        loadProfile(user.id);
-                    };
-                } else {
-                    vBtn.disabled = true;
-                    vBtn.className = "w-full bg-slate-100 text-slate-400 py-4 rounded-xl font-bold cursor-not-allowed";
-                }
+            if(vBtn && !!currentProfile?.handle && !!currentProfile?.avatar_url && currentLinksCount >= 3) {
+                vBtn.disabled = false;
+                vBtn.className = "w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition transform hover:-translate-y-1";
+                vBtn.onclick = async () => {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', user.id);
+                    loadProfile(user.id);
+                };
             }
         }
 
@@ -350,10 +379,7 @@
             if(!el) return;
             el.className = met ? "flex items-center gap-3 text-green-600 font-bold" : "flex items-center gap-3 text-slate-400";
             const icon = el.querySelector('i');
-            if(icon) {
-                icon.dataset.feather = met ? "check-circle" : "circle";
-                feather.replace();
-            }
+            if(icon) { icon.dataset.feather = met ? "check-circle" : "circle"; feather.replace(); }
         }
 
         async function showPublic(query) {
@@ -362,76 +388,44 @@
             document.getElementById('dashboard-view').classList.remove('hidden');
             document.querySelector('#dashboard-view > div:first-child').classList.add('hidden');
             const phone = document.getElementById('phone-preview');
-            phone.classList.replace('rounded-[3rem]', 'rounded-none');
-            phone.classList.replace('border-[10px]', 'border-0');
-            phone.classList.replace('max-w-[300px]', 'max-w-full');
-            phone.classList.add('fixed', 'inset-0', 'h-screen');
+            phone.className = "fixed inset-0 h-screen w-full bg-slate-900 z-50";
 
             const { data: profile } = await supabaseClient.from('profiles').select('*').or(`handle.eq."${query}",id.eq."${query}"`).single();
             if (profile) {
+                await supabaseClient.from('profiles').update({ page_visits: (profile.page_visits || 0) + 1 }).eq('id', profile.id);
                 updatePreviewBg(profile.bg_color || '#0f172a');
                 document.getElementById('preview-handle').innerText = profile.handle || 'User';
+                document.getElementById('preview-bio').innerText = profile.bio || '';
+                document.getElementById('preview-business-tag').classList.toggle('hidden', !profile.is_business);
                 if(profile.avatar_url) document.getElementById('preview-avatar').src = `${SUPABASE_URL}/storage/v1/object/public/avatars/${profile.avatar_url}`;
                 if(profile.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
-                renderSocials(profile.socials || {});
                 fetchLinks(profile.id, true);
+                feather.replace();
             }
         }
 
-        document.getElementById('add-link-btn').addEventListener('click', async () => {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if(!user) return;
-            await supabaseClient.from('links').insert([{ 
-                label: document.getElementById('link-label').value, 
-                url: document.getElementById('link-url').value, 
-                user_id: user.id 
-            }]);
-            fetchLinks(user.id);
-            document.getElementById('link-label').value = '';
-            document.getElementById('link-url').value = '';
-        });
-
         document.getElementById('login-btn').addEventListener('click', async () => {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-                email: document.getElementById('email').value, 
-                password: document.getElementById('password').value 
-            });
-            if (error) alert(error.message); else setupDashboard(data.user);
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value });
+            if (error) showModal("Error", error.message); else setupDashboard(data.user);
         });
 
         document.getElementById('signup-btn').addEventListener('click', async () => {
-            const { error } = await supabaseClient.auth.signUp({ 
-                email: document.getElementById('email').value, 
-                password: document.getElementById('password').value 
-            });
-            if (error) alert(error.message); else alert("Verify your email to continue.");
+            const { error } = await supabaseClient.auth.signUp({ email: document.getElementById('email').value, password: document.getElementById('password').value });
+            if (error) showModal("Error", error.message); else showModal("Verify Email", "Check your inbox to confirm.");
         });
 
-        document.getElementById('logout-btn-action').addEventListener('click', async () => { 
-            await supabaseClient.auth.signOut(); 
-            window.location.reload(); 
+        document.getElementById('logout-btn-action').addEventListener('click', async () => { await supabaseClient.auth.signOut(); location.reload(); });
+        function copyLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').value); showModal("Copied", "Link copied!"); }
+        function startApp() { document.getElementById('landing-wrapper').classList.add('hidden'); document.getElementById('app-container').classList.remove('hidden'); }
+        function updateUrlDisplay(p) { document.getElementById('public-url-display').value = `${window.location.origin}${window.location.pathname}?u=${p.handle || p.id}`; }
+        async function deleteLink(id) { await supabaseClient.from('links').delete().eq('id', id); checkUser(); }
+
+        document.getElementById('add-link-btn').addEventListener('click', async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            await supabaseClient.from('links').insert([{ label: document.getElementById('link-label').value, url: document.getElementById('link-url').value, user_id: user.id }]);
+            fetchLinks(user.id);
+            document.getElementById('link-label').value = ''; document.getElementById('link-url').value = '';
         });
-
-        function copyLink() { 
-            navigator.clipboard.writeText(document.getElementById('public-url-display').value); 
-            alert("Public link copied!"); 
-        }
-
-        function startApp() { 
-            document.getElementById('landing-wrapper').classList.add('hidden'); 
-            document.getElementById('app-container').classList.remove('hidden'); 
-        }
-
-        function updateUrlDisplay(profile) { 
-            const baseUrl = window.location.origin + window.location.pathname;
-            document.getElementById('public-url-display').value = `${baseUrl}?u=${profile.handle || profile.id}`; 
-        }
-
-        async function deleteLink(id) { 
-            await supabaseClient.from('links').delete().eq('id', id); 
-            const { data: { user } } = await supabaseClient.auth.getUser(); 
-            if(user) fetchLinks(user.id); 
-        }
 
         init();
     </script>

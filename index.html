@@ -51,6 +51,9 @@
             <i data-feather="layers"></i><span>LinkStack</span>
         </div>
         <div id="nav-actions" class="flex items-center gap-4">
+            <button id="business-nav-btn" onclick="window.location.href='/business'" class="hidden px-5 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-indigo-700 transition">
+                <i data-feather="briefcase" class="w-4 h-4"></i> Business Account
+            </button>
             <button id="logout-btn" class="hidden px-5 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2">
                 <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
             </button>
@@ -77,6 +80,7 @@
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
                     <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap">Links</button>
                     <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Appearance</button>
+                    <button onclick="switchTab('marketplace')" id="tab-marketplace" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Marketplace</button>
                     <button onclick="switchTab('social')" id="tab-social" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Socials</button>
                     <button onclick="switchTab('analytics')" id="tab-analytics" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Analytics</button>
                     <button onclick="switchTab('pro')" id="tab-pro" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Pro Features</button>
@@ -132,6 +136,14 @@
                         </div>
                     </div>
                     <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-100">Save Profile</button>
+                </div>
+
+                <div id="section-marketplace" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-black">Theme Marketplace</h3>
+                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-tighter">Business Required for Premium</span>
+                    </div>
+                    <div id="theme-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                 </div>
 
                 <div id="section-social" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-4 shadow-sm">
@@ -237,6 +249,7 @@
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('dashboard-view').classList.remove('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('business-nav-btn').classList.remove('hidden');
                 await loadProfileData(session.user.id);
                 loadLinks(session.user.id);
             }
@@ -323,6 +336,36 @@
             }
         }
 
+        async function fetchThemes() {
+            const { data: themes } = await supabaseClient.from('themes').select('*');
+            const grid = document.getElementById('theme-grid');
+            grid.innerHTML = themes.map(theme => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden group">
+                    <div class="relative h-40 mb-4 overflow-hidden rounded-2xl">
+                        <img src="${theme.preview_url}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        ${theme.is_premium ? `<div class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg"><i data-feather="zap" class="w-3 h-3 fill-current"></i> PREMIUM</div>` : ''}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-black text-sm">${theme.name}</p>
+                            <p class="text-[10px] text-slate-400">${theme.is_premium ? `$${theme.price}` : 'Free Access'}</p>
+                        </div>
+                        <button onclick="applyTheme('${theme.name}', ${theme.is_premium})" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-black transition">Apply</button>
+                    </div>
+                </div>
+            `).join('');
+            feather.replace();
+        }
+
+        async function applyTheme(name, isPremium) {
+            if (isPremium && !currentProfile.is_business) {
+                showModal("Premium Required", "This theme is exclusive to Business accounts. Upgrade at /business to unlock.");
+                return;
+            }
+            const { error } = await supabaseClient.from('profiles').update({ selected_theme: name }).eq('id', currentProfile.id);
+            if (!error) showModal("Theme Applied", `${name} is now active on your profile.`);
+        }
+
         async function fetchAnalytics() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             const { data: links } = await supabaseClient.from('links').select('id, label').eq('user_id', user.id);
@@ -375,7 +418,6 @@
             feather.replace();
         }
 
-        // Action Buttons
         document.getElementById('save-onboarding-btn').addEventListener('click', async () => {
             const handle = document.getElementById('onboarding-handle-input').value.trim().toLowerCase();
             if(!handle) return;
@@ -454,13 +496,14 @@
         }
 
         function switchTab(t) {
-            ['links','style','social','analytics','pro'].forEach(s => {
+            ['links','style','marketplace','social','analytics','pro'].forEach(s => {
                 document.getElementById('section-'+s)?.classList.add('hidden');
                 document.getElementById('tab-'+s).classList.replace('active-tab', 'text-slate-400');
             });
             document.getElementById('section-'+t).classList.remove('hidden');
             document.getElementById('tab-'+t).classList.replace('text-slate-400', 'active-tab');
             if (t === 'analytics') fetchAnalytics();
+            if (t === 'marketplace') fetchThemes();
         }
 
         function copyPublicLink() {

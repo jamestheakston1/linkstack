@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linktree Alternative | LinkStack: The Independent Choice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .independent-accent { border-bottom: 3px solid #6366f1; }
+        .feature-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
+    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
+            <i data-feather="layers"></i><span>LinkStack</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="/" class="text-sm font-bold text-slate-500 hover:text-indigo-600 transition">Main App</a>
+            <button onclick="location.href='/?auth=true'" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-100">Get Started</button>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20">
+        <section class="max-w-7xl mx-auto px-6 text-center mb-24">
+            <span class="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest mb-6 inline-block">The Independent Alternative</span>
+            <h1 class="text-5xl md:text-7xl font-black mb-8 tracking-tighter leading-tight">Better than Linktree.<br><span class="independent-accent text-indigo-600">Truly Independent.</span></h1>
+            <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto font-medium">Looking for a Linktree alternative? LinkStack offers more customization, better analytics, and a creator-first philosophy. We are a <span class="font-bold text-slate-900">wholly independent platform</span> with no corporate ties to Linktree, Inc.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="location.href='/?auth=true'" class="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-2xl shadow-indigo-200 hover:scale-105 transition">Switch to LinkStack</button>
+                <button class="px-10 py-5 bg-white border-2 border-slate-100 text-slate-900 font-black rounded-2xl hover:bg-slate-50 transition">See Comparisons</button>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-6 py-20 bg-white rounded-[4rem] border border-slate-100 shadow-sm">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black mb-4">Why Creators Switch</h2>
+                <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">LinkStack vs. The Others</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="feature-card p-8 rounded-3xl bg-slate-50 border border-slate-100">
+                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-feather="unlock" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black mb-3 text-slate-900">Total Ownership</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">Unlike some platforms, we don't lock your data. You own your audience and your links. We are independent and built for creators who value digital sovereignty.</p>
+                </div>
+
+                <div class="feature-card p-8 rounded-3xl bg-slate-50 border border-slate-100">
+                    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-feather="palette" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black mb-3 text-slate-900">Custom Styling</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">Get features Linktree charges for, like custom background images, animated links, and professional color palettes, starting from our free tier.</p>
+                </div>
+
+                <div class="feature-card p-8 rounded-3xl bg-slate-50 border border-slate-100">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-feather="bar-chart-2" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black mb-3 text-slate-900">Advanced Analytics</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">Deep insights into your audience's behavior. Track clicks, visits, and conversions with our integrated charting system.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-4xl mx-auto px-6 py-24 text-center">
+            <div class="p-12 bg-indigo-600 rounded-[3rem] text-white shadow-2xl">
+                <h2 class="text-3xl font-black mb-6">Legal Disclaimer</h2>
+                <p class="text-indigo-100 text-sm leading-relaxed mb-8">LinkStack is an independent platform. We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with Linktree, Inc., or any of its subsidiaries or its affiliates. The name "Linktree" as well as related names, marks, emblems, and images are registered trademarks of their respective owners.</p>
+                <div class="flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest text-indigo-300">
+                    <i data-feather="shield" class="w-4 h-4"></i> Independent Creator Platform
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white border-t border-slate-100 py-12 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:row justify-between items-center gap-8">
+            <div class="flex items-center gap-2 font-black text-xl text-indigo-600">
+                <i data-feather="layers"></i><span>LinkStack</span>
+            </div>
+            <div class="flex gap-8 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                <a href="/privacy.html" class="hover:text-indigo-600">Privacy Policy</a>
+                <a href="/" class="hover:text-indigo-600">Home</a>
+            </div>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">&copy; James Theakston</p>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>

@@ -185,11 +185,19 @@
         }
 
         async function loadAll() {
-            const { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+            const { data: p, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+            
+            if (!p) {
+                console.warn("Profile not found for this user.");
+                await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]);
+                location.reload();
+                return;
+            }
+
             const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUser.id);
             
             cachedProfile = p;
-            cachedLinks = links;
+            cachedLinks = links || [];
             selectedTheme = p.theme_id || 'default';
             
             updateForms();
@@ -206,7 +214,8 @@
             document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
             
             document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('theme-' + selectedTheme).classList.add('active');
+            const currentThemeEl = document.getElementById('theme-' + selectedTheme);
+            if (currentThemeEl) currentThemeEl.classList.add('active');
 
             document.getElementById('pro-social-fields').classList.toggle('hidden', !p.is_business);
             document.getElementById('biz-promo').classList.toggle('hidden', p.is_business);
@@ -223,7 +232,7 @@
 
         function updatePreview() {
             const p = cachedProfile;
-            const theme = themeConfig[selectedTheme];
+            const theme = themeConfig[selectedTheme] || themeConfig.default;
             const preview = document.getElementById('phone-preview');
             
             preview.style.background = theme.bg;
@@ -281,7 +290,8 @@
         function setTheme(id) {
             selectedTheme = id;
             document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('theme-' + id).classList.add('active');
+            const el = document.getElementById('theme-' + id);
+            if (el) el.classList.add('active');
             updatePreview();
         }
 

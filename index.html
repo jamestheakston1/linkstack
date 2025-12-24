@@ -9,37 +9,52 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .active-tab { border-bottom: 2px solid #6366f1; color: #6366f1; }
         .checkmark { color: #3b82f6; width: 18px; height: 18px; }
-        #phone-preview { transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #phone-preview { transition: background 0.4s ease; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
     <nav id="main-nav" class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="window.location.reload()">
+        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 cursor-pointer" onclick="window.location.href=window.location.origin + window.location.pathname">
             <i data-feather="layers"></i>
             <span>LinkStack</span>
         </div>
-        <div id="nav-actions" class="flex items-center gap-4">
-            <div id="user-menu" class="hidden relative group cursor-pointer">
-                <img id="nav-avatar" src="https://ui-avatars.com/api/?name=User" class="w-10 h-10 rounded-full border-2 border-indigo-100 object-cover">
-                <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 hidden group-hover:block z-50 overflow-hidden">
-                    <button onclick="switchTab('verify')" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-2"><i data-feather="award" class="w-4 h-4"></i> Get Verified</button>
-                    <button onclick="switchTab('analytics')" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-2"><i data-feather="bar-chart-2" class="w-4 h-4"></i> Analytics</button>
-                    <button id="logout-btn-action" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"><i data-feather="log-out" class="w-4 h-4"></i> Sign Out</button>
-                </div>
-            </div>
+        <div id="nav-actions">
+            <button id="logout-btn-action" class="hidden px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-100 flex items-center gap-2">
+                <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
+            </button>
         </div>
     </nav>
 
     <div id="landing-wrapper">
         <section class="pt-48 pb-32 px-6 text-center bg-gradient-to-b from-indigo-50 to-white">
             <div class="max-w-4xl mx-auto">
-                <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter text-slate-900">The only link you'll <span class="text-indigo-600">ever need.</span></h1>
-                <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Connect your audience to everything you do. Optimized for mobile, designed for creators.</p>
-                <button onclick="startApp()" class="px-10 py-5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-2xl transition transform hover:-translate-y-1">Claim your link</button>
+                <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter text-slate-900 leading-tight">Your world, <br><span class="text-indigo-600">one link.</span></h1>
+                <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Create a beautiful, verified landing page for your brand in seconds. Track clicks and customize your style.</p>
+                <button onclick="startApp()" class="px-10 py-5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-2xl transition transform hover:-translate-y-1">Get Started Free</button>
+            </div>
+        </section>
+        
+        <section class="py-20 bg-white">
+            <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+                <div class="p-8 bg-slate-50 rounded-3xl">
+                    <i data-feather="bar-chart" class="text-indigo-600 mb-4"></i>
+                    <h3 class="font-bold text-xl mb-2">Detailed Analytics</h3>
+                    <p class="text-slate-600">Know exactly which links your audience is clicking with real-time tracking.</p>
+                </div>
+                <div class="p-8 bg-slate-50 rounded-3xl">
+                    <i data-feather="check-circle" class="text-indigo-600 mb-4"></i>
+                    <h3 class="font-bold text-xl mb-2">Verified Badges</h3>
+                    <p class="text-slate-600">Build trust with your community using our automated verification system.</p>
+                </div>
+                <div class="p-8 bg-slate-50 rounded-3xl">
+                    <i data-feather="palette" class="text-indigo-600 mb-4"></i>
+                    <h3 class="font-bold text-xl mb-2">Full Customization</h3>
+                    <p class="text-slate-600">Match your brand with custom colors, handles, and social integrations.</p>
+                </div>
             </div>
         </section>
     </div>
@@ -66,70 +81,70 @@
                 <div id="section-links" class="space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-xl font-bold">Add Link</h3>
-                        <input type="text" id="link-label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Title">
-                        <input type="url" id="link-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="https://...">
-                        <button id="add-link-btn" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold">Add Link</button>
+                        <input type="text" id="link-label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="Link Name (e.g. My Website)">
+                        <input type="url" id="link-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl" placeholder="URL (e.g. https://...)">
+                        <button id="add-link-btn" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-black transition">Add Link</button>
                     </div>
                 </div>
 
                 <div id="section-appearance" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6">
-                        <h3 class="text-xl font-bold">Style & Profiles</h3>
+                        <h3 class="text-xl font-bold">Identity & Style</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-bold mb-2">Handle</label>
-                                <input type="text" id="profile-handle" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="username">
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Handle</label>
+                                <input type="text" id="profile-handle" class="w-full px-4 py-2 bg-slate-50 border rounded-lg focus:ring-2 ring-indigo-100 outline-none" placeholder="yourhandle">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold mb-2">Background Color</label>
-                                <input type="color" id="profile-bg" oninput="updatePreviewBg(this.value)" class="w-full h-10 p-1 bg-slate-50 border rounded-lg">
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">BG Color</label>
+                                <input type="color" id="profile-bg" oninput="updatePreviewBg(this.value)" class="w-full h-10 p-1 bg-white border rounded-lg cursor-pointer">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-bold mb-2">Twitter</label>
-                                <input type="text" id="social-twitter" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@handle">
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Twitter</label>
+                                <input type="text" id="social-twitter" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@username">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold mb-2">Instagram</label>
-                                <input type="text" id="social-instagram" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@handle">
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Instagram</label>
+                                <input type="text" id="social-instagram" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" placeholder="@username">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-2">Profile Picture</label>
-                            <input type="file" id="avatar-upload" class="hidden" accept="image/*">
-                            <button onclick="document.getElementById('avatar-upload').click()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-indigo-400 transition">Upload Image</button>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Profile Image</label>
+                            <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="handleFileSelected()">
+                            <button id="upload-trigger" onclick="document.getElementById('avatar-upload').click()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-indigo-400 transition flex items-center justify-center gap-2">
+                                <i data-feather="upload-cloud"></i> <span id="upload-status-text">Choose Image</span>
+                            </button>
                         </div>
-                        <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Save Changes</button>
+                        <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-indigo-100">Save Changes</button>
                     </div>
                 </div>
 
                 <div id="section-analytics" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="text-xl font-bold mb-4">Click Analytics</h3>
-                        <div class="grid grid-cols-1 gap-4" id="analytics-list">
-                            <p class="text-slate-400 text-sm italic">No data yet. Share your link to start tracking.</p>
-                        </div>
+                        <h3 class="text-xl font-bold mb-6">Performance</h3>
+                        <div class="space-y-3" id="analytics-list"></div>
                     </div>
                 </div>
 
                 <div id="section-verify" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="text-xl font-bold mb-6">Verification</h3>
+                        <h3 class="text-xl font-bold mb-6">Verification Progress</h3>
                         <div class="space-y-4 mb-8">
-                            <div id="crit-handle" class="flex items-center gap-3 text-slate-400"><i data-feather="circle" class="w-5 h-5"></i><span>Unique handle set</span></div>
-                            <div id="crit-avatar" class="flex items-center gap-3 text-slate-400"><i data-feather="circle" class="w-5 h-5"></i><span>Profile picture uploaded</span></div>
-                            <div id="crit-links" class="flex items-center gap-3 text-slate-400"><i data-feather="circle" class="w-5 h-5"></i><span>At least 3 links added</span></div>
+                            <div id="crit-handle" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>Unique handle set</span></div>
+                            <div id="crit-avatar" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>Profile picture uploaded</span></div>
+                            <div id="crit-links" class="flex items-center gap-3"><i data-feather="circle" class="w-5 h-5"></i><span>At least 3 links added</span></div>
                         </div>
-                        <button id="real-verify-btn" disabled class="w-full bg-slate-100 text-slate-300 py-4 rounded-xl font-bold cursor-not-allowed">Verify Now</button>
+                        <button id="real-verify-btn" disabled class="w-full bg-slate-100 text-slate-400 py-4 rounded-xl font-bold cursor-not-allowed">Verify Now</button>
                     </div>
                 </div>
 
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold mb-2">Public Link</h3>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase mb-2">Your Public Link</h3>
                     <div class="flex items-center gap-2">
-                        <input type="text" id="public-url-display" readonly class="flex-1 bg-slate-50 px-4 py-2 rounded-lg text-sm font-mono">
-                        <button onclick="copyLink()" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-feather="copy" class="w-4 h-4"></i></button>
+                        <input type="text" id="public-url-display" readonly class="flex-1 bg-slate-50 px-4 py-2 rounded-lg text-sm font-mono border-none outline-none">
+                        <button onclick="copyLink()" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition"><i data-feather="copy" class="w-4 h-4"></i></button>
                     </div>
                 </div>
             </div>
@@ -167,8 +182,8 @@
         }
 
         async function checkUser() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) setupDashboard(session.user);
+            const { data } = await supabaseClient.auth.getSession();
+            if (data?.session) setupDashboard(data.session.user);
         }
 
         function switchTab(tabId) {
@@ -185,11 +200,12 @@
         }
 
         async function setupDashboard(user) {
+            if(!user) return;
             document.getElementById('landing-wrapper').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
-            document.getElementById('user-menu').classList.remove('hidden');
+            document.getElementById('logout-btn-action').classList.remove('hidden');
             await loadProfile(user.id);
             fetchLinks(user.id);
         }
@@ -210,7 +226,7 @@
                 if(data.avatar_url) {
                     const avatar = `${SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url}`;
                     document.getElementById('preview-avatar').src = avatar;
-                    document.getElementById('nav-avatar').src = avatar;
+                    document.getElementById('upload-status-text').innerText = "Image Uploaded!";
                 }
                 if(data.is_verified) document.getElementById('verified-badge').classList.remove('hidden');
                 updateUrlDisplay(data);
@@ -218,15 +234,22 @@
             updateCriteria();
         }
 
+        function handleFileSelected() {
+            const file = document.getElementById('avatar-upload').files[0];
+            if(file) document.getElementById('upload-status-text').innerText = "Selected: " + file.name;
+        }
+
         function updatePreviewBg(color) {
-            document.getElementById('phone-preview').style.backgroundColor = color;
+            const preview = document.getElementById('phone-preview');
+            if(preview) preview.style.backgroundColor = color;
         }
 
         function renderSocials(socials) {
             const container = document.getElementById('socials-preview');
+            if(!container) return;
             container.innerHTML = '';
             Object.entries(socials).forEach(([platform, handle]) => {
-                if(handle) {
+                if(handle && handle.trim() !== '') {
                     const icon = document.createElement('div');
                     icon.className = 'w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition';
                     icon.innerHTML = `<i data-feather="${platform}" class="w-4 h-4"></i>`;
@@ -238,6 +261,8 @@
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
+            if(!user) return;
+            
             const handle = document.getElementById('profile-handle').value;
             const bg_color = document.getElementById('profile-bg').value;
             const socials = {
@@ -256,13 +281,14 @@
 
             await supabaseClient.from('profiles').upsert({ id: user.id, handle, bg_color, socials, avatar_url: avatarPath });
             await loadProfile(user.id);
-            alert("Styles saved!");
+            alert("Profile updated successfully.");
         });
 
         async function fetchLinks(userId, isPublic = false) {
             const { data } = await supabaseClient.from('links').select('*').eq('user_id', userId).order('created_at');
             currentLinksCount = data?.length || 0;
             const container = document.getElementById('links-list');
+            if(!container) return;
             container.innerHTML = (data || []).map(l => `
                 <div class="group relative">
                     <a href="${l.url}" onclick="trackClick('${l.id}', '${userId}')" target="_blank" class="block py-4 px-4 bg-white/10 border border-white/10 rounded-2xl text-center text-sm font-bold text-white transition hover:scale-[1.02]">${l.label}</a>
@@ -279,35 +305,43 @@
 
         async function fetchAnalytics() {
             const { data: { user } } = await supabaseClient.auth.getUser();
+            if(!user) return;
             const { data: links } = await supabaseClient.from('links').select('id, label').eq('user_id', user.id);
             const { data: clicks } = await supabaseClient.from('link_clicks').select('link_id').eq('user_id', user.id);
             
             const listEl = document.getElementById('analytics-list');
+            if(!listEl) return;
             listEl.innerHTML = links.map(l => {
-                const count = clicks.filter(c => c.link_id === l.id).length;
-                return `<div class="flex justify-between p-4 bg-slate-50 rounded-xl border">
+                const count = (clicks || []).filter(c => c.link_id === l.id).length;
+                return `<div class="flex justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                     <span class="font-bold">${l.label}</span>
                     <span class="text-indigo-600 font-black">${count} clicks</span>
                 </div>`;
-            }).join('') || '<p class="text-slate-400 italic">No links found.</p>';
+            }).join('') || '<p class="text-slate-400 italic">No links added yet.</p>';
         }
 
         function updateCriteria() {
-            const h = document.getElementById('profile-handle').value;
+            const h = document.getElementById('profile-handle')?.value;
             const a = currentProfile?.avatar_url;
+            
             setCrit('crit-handle', !!h);
             setCrit('crit-avatar', !!a);
             setCrit('crit-links', currentLinksCount >= 3);
 
             const vBtn = document.getElementById('real-verify-btn');
-            if(!!h && !!a && currentLinksCount >= 3 && !currentProfile?.is_verified) {
-                vBtn.disabled = false;
-                vBtn.className = "w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition transform hover:-translate-y-1";
-                vBtn.onclick = async () => {
-                    const { data: { user } } = await supabaseClient.auth.getUser();
-                    await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', user.id);
-                    loadProfile(user.id);
-                };
+            if(vBtn) {
+                if(!!h && !!a && currentLinksCount >= 3 && !currentProfile?.is_verified) {
+                    vBtn.disabled = false;
+                    vBtn.className = "w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition transform hover:-translate-y-1";
+                    vBtn.onclick = async () => {
+                        const { data: { user } } = await supabaseClient.auth.getUser();
+                        await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', user.id);
+                        loadProfile(user.id);
+                    };
+                } else {
+                    vBtn.disabled = true;
+                    vBtn.className = "w-full bg-slate-100 text-slate-400 py-4 rounded-xl font-bold cursor-not-allowed";
+                }
             }
         }
 
@@ -315,8 +349,11 @@
             const el = document.getElementById(id);
             if(!el) return;
             el.className = met ? "flex items-center gap-3 text-green-600 font-bold" : "flex items-center gap-3 text-slate-400";
-            el.querySelector('i').dataset.feather = met ? "check-circle" : "circle";
-            feather.replace();
+            const icon = el.querySelector('i');
+            if(icon) {
+                icon.dataset.feather = met ? "check-circle" : "circle";
+                feather.replace();
+            }
         }
 
         async function showPublic(query) {
@@ -330,7 +367,7 @@
             phone.classList.replace('max-w-[300px]', 'max-w-full');
             phone.classList.add('fixed', 'inset-0', 'h-screen');
 
-            const { data: profile } = await supabaseClient.from('profiles').select('*').or(`handle.eq.${query},id.eq.${query}`).single();
+            const { data: profile } = await supabaseClient.from('profiles').select('*').or(`handle.eq."${query}",id.eq."${query}"`).single();
             if (profile) {
                 updatePreviewBg(profile.bg_color || '#0f172a');
                 document.getElementById('preview-handle').innerText = profile.handle || 'User';
@@ -343,6 +380,7 @@
 
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
+            if(!user) return;
             await supabaseClient.from('links').insert([{ 
                 label: document.getElementById('link-label').value, 
                 url: document.getElementById('link-url').value, 
@@ -366,14 +404,34 @@
                 email: document.getElementById('email').value, 
                 password: document.getElementById('password').value 
             });
-            if (error) alert(error.message); else alert("Check your email!");
+            if (error) alert(error.message); else alert("Verify your email to continue.");
         });
 
-        document.getElementById('logout-btn-action').addEventListener('click', () => { supabaseClient.auth.signOut(); window.location.reload(); });
-        function copyLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').value); alert("Copied!"); }
-        function startApp() { document.getElementById('landing-wrapper').classList.add('hidden'); document.getElementById('app-container').classList.remove('hidden'); }
-        function updateUrlDisplay(profile) { document.getElementById('public-url-display').value = `https://link-stack.pages.dev/?u=${profile.handle || profile.id}`; }
-        async function deleteLink(id) { await supabaseClient.from('links').delete().eq('id', id); const { data: { user } } = await supabaseClient.auth.getUser(); fetchLinks(user.id); }
+        document.getElementById('logout-btn-action').addEventListener('click', async () => { 
+            await supabaseClient.auth.signOut(); 
+            window.location.reload(); 
+        });
+
+        function copyLink() { 
+            navigator.clipboard.writeText(document.getElementById('public-url-display').value); 
+            alert("Public link copied!"); 
+        }
+
+        function startApp() { 
+            document.getElementById('landing-wrapper').classList.add('hidden'); 
+            document.getElementById('app-container').classList.remove('hidden'); 
+        }
+
+        function updateUrlDisplay(profile) { 
+            const baseUrl = window.location.origin + window.location.pathname;
+            document.getElementById('public-url-display').value = `${baseUrl}?u=${profile.handle || profile.id}`; 
+        }
+
+        async function deleteLink(id) { 
+            await supabaseClient.from('links').delete().eq('id', id); 
+            const { data: { user } } = await supabaseClient.auth.getUser(); 
+            if(user) fetchLinks(user.id); 
+        }
 
         init();
     </script>

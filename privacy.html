@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | LinkStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
+    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
+            <i data-feather="layers"></i><span>LinkStack</span>
+        </div>
+        <a href="/" class="px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-black transition">Back to App</a>
+    </nav>
+
+    <main class="pt-32 pb-20 px-6 max-w-4xl mx-auto">
+        <div class="bg-white p-10 md:p-16 rounded-[3rem] shadow-xl border border-slate-100">
+            <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tighter">Privacy Policy</h1>
+            <p class="text-slate-400 font-bold text-sm uppercase tracking-widest mb-12">Last Updated: October 2023</p>
+
+            <div class="space-y-10 text-slate-600 leading-relaxed">
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="shield" class="text-indigo-600"></i> Introduction
+                    </h2>
+                    <p>LinkStack is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our platform to manage your digital identity and links.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="database" class="text-indigo-600"></i> Information We Collect
+                    </h2>
+                    <ul class="list-disc ml-6 space-y-2">
+                        <li><strong>Account Data:</strong> We store your email address and encrypted credentials via Supabase Authentication.</li>
+                        <li><strong>Profile Information:</strong> We store the handles, bios, avatars, and social media usernames you choose to display.</li>
+                        <li><strong>Link Data:</strong> We store the URLs and labels you add to your public profile.</li>
+                        <li><strong>Analytics:</strong> We collect aggregate data on link clicks and page visits to provide insights into your audience engagement.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="check-square" class="text-indigo-600"></i> Spam Protection (hCaptcha)
+                    </h2>
+                    <p>We use the hCaptcha anti-bot service on our website. This service is provided by Intuition Machines, Inc. hCaptcha is used to check whether the data entered on our website (such as on a login or registration page) has been entered by a human or by an automated program.</p>
+                    <p class="mt-4">hCaptcha analyzes the behavior of the website visitor based on various characteristics. This analysis starts automatically as soon as the website visitor enters a part of the website where hCaptcha is active. For the analysis, hCaptcha evaluates various information (e.g. IP address, how long the visitor has been on the website, or mouse movements made by the user).</p>
+                    <p class="mt-4">Data processing is based on our legitimate interest in protecting our website from abusive automated crawling and spam.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="eye" class="text-indigo-600"></i> How We Use Information
+                    </h2>
+                    <p>Your information is used to provide and improve the LinkStack service, including:</p>
+                    <ul class="list-disc ml-6 mt-4 space-y-2">
+                        <li>Personalizing your public link-in-bio page.</li>
+                        <li>Facilitating "Business" features and verification badges.</li>
+                        <li>Providing you with analytics regarding your profile performance.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="lock" class="text-indigo-600"></i> Data Security
+                    </h2>
+                    <p>We utilize Supabase's secure infrastructure to manage your data. All authentication and database requests are handled via secure, encrypted channels. We do not sell your personal data to third parties.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                        <i data-feather="user" class="text-indigo-600"></i> Your Rights
+                    </h2>
+                    <p>You have the right to access, update, or delete your personal information at any time through your dashboard. If you delete your account, all associated profile data and links will be removed from our active databases.</p>
+                </section>
+
+                <section class="pt-8 border-t border-slate-100">
+                    <p class="text-sm font-medium italic">For further inquiries regarding our privacy practices, please contact us through the official LinkStack support channels.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="pb-12 text-center">
+        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">&copy; James Theakston</p>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>

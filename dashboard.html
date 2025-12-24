@@ -8,9 +8,8 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
-    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
-    <script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
     <style>
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .hidden { display: none !important; }
@@ -20,6 +19,7 @@
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
         .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1.25rem; }
         .theme-card.active { border-color: #6366f1; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        #map { width: 100%; height: 300px; border-radius: 1.5rem; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -53,11 +53,10 @@
         <section class="grid lg:grid-cols-12 gap-12">
             
             <div class="lg:col-span-7 space-y-8">
-                
-                <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-200">
+                <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Live Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -67,8 +66,7 @@
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
                     <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap">Links</button>
                     <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Appearance</button>
-                    <button onclick="switchTab('social')" id="tab-social" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Socials</button>
-                    <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Business</button>
+                    <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap">Analytics</button>
                 </div>
 
                 <div id="section-links" class="space-y-6">
@@ -87,11 +85,14 @@
 
                 <div id="section-style" class="hidden space-y-8">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                        <h3 class="text-lg font-black mb-6">Identity & Style</h3>
+                        <h3 class="text-lg font-black mb-6">Identity</h3>
                         <div class="space-y-4">
-                            <input type="text" id="profile-handle" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Handle (e.g. james)">
-                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Avatar Image URL">
-                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Tell us about yourself..."></textarea>
+                            <input type="text" id="profile-handle" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Handle">
+                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Avatar URL">
+                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Bio..."></textarea>
+                            <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2">
+                                <i data-feather="save"></i> Save Appearance
+                            </button>
                         </div>
                     </div>
 
@@ -100,56 +101,42 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="themes-grid">
                             <div onclick="setTheme('default')" id="theme-default" class="theme-card bg-slate-900 text-white text-xs font-black uppercase">Midnight</div>
                             <div onclick="setTheme('sunset')" id="theme-sunset" class="theme-card bg-gradient-to-br from-orange-400 to-pink-600 text-white text-xs font-black uppercase">Sunset</div>
-                            <div onclick="setTheme('forest')" id="theme-forest" class="theme-card bg-emerald-800 text-emerald-100 text-xs font-black uppercase">Forest</div>
-                            <div onclick="setTheme('cotton')" id="theme-cotton" class="theme-card bg-pink-100 text-pink-600 text-xs font-black uppercase">Cotton Candy</div>
-                            <div onclick="setTheme('glass')" id="theme-glass" class="theme-card bg-slate-200 text-slate-800 text-xs font-black uppercase border-dashed border-2">Glassmorphism</div>
+                            <div onclick="setTheme('glass')" id="theme-glass" class="theme-card bg-slate-200 text-slate-800 text-xs font-black uppercase border-dashed border-2">Glass</div>
                         </div>
                     </div>
-                    <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2">
-                        <i data-feather="save"></i> Save Appearance
-                    </button>
-                </div>
-
-                <div id="section-social" class="hidden bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
-                    <h3 class="text-lg font-black">Social Connections</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="social-ig" placeholder="Instagram Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                        <input type="text" id="social-tw" placeholder="Twitter/X Username" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                        <div id="pro-social-fields" class="hidden space-y-4 pt-4 border-t">
-                            <input type="text" id="social-li" placeholder="LinkedIn URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                            <input type="text" id="social-yt" placeholder="YouTube URL" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                            <input type="text" id="social-wa" placeholder="WhatsApp Number" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                        </div>
-                        <div id="biz-promo" class="p-6 bg-indigo-50 rounded-2xl text-center">
-                            <p class="text-sm font-bold text-indigo-600 mb-2">Unlock Pro Connections</p>
-                            <button onclick="switchTab('business')" class="text-xs font-black underline flex items-center justify-center gap-1 mx-auto">
-                                <i data-feather="arrow-up-circle" class="w-3 h-3"></i> Upgrade to Business
-                            </button>
-                        </div>
-                    </div>
-                    <button id="save-socials-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2">
-                        <i data-feather="refresh-cw"></i> Sync Socials
-                    </button>
                 </div>
 
                 <div id="section-business" class="hidden space-y-6">
-                    <div id="business-stats" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-2xl font-black">Analytics & Verification</h3>
-                            <div id="v-status-badge" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"></div>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-2xl font-black">Live Analytics</h3>
+                            <div class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Active
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visits</p>
+                                <p id="stat-visits" class="text-2xl font-black">0</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clicks</p>
+                                <p id="stat-clicks" class="text-2xl font-black">0</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p>
+                                <p id="stat-ctr" class="text-2xl font-black">0%</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Countries</p>
+                                <p id="stat-countries" class="text-2xl font-black">0</p>
+                            </div>
                         </div>
 
-                        <div id="verification-checklist" class="grid md:grid-cols-2 gap-4 p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                            <div id="v-biz" class="flex gap-3 items-center text-xs font-bold text-slate-300"><i data-feather="circle" class="w-4 h-4"></i> Business Pro</div>
-                            <div id="v-handle" class="flex gap-3 items-center text-xs font-bold text-slate-300"><i data-feather="circle" class="w-4 h-4"></i> Custom Handle</div>
-                            <div id="v-bio" class="flex gap-3 items-center text-xs font-bold text-slate-300"><i data-feather="circle" class="w-4 h-4"></i> Profile Bio</div>
-                            <div id="v-avatar" class="flex gap-3 items-center text-xs font-bold text-slate-300"><i data-feather="circle" class="w-4 h-4"></i> Avatar Set</div>
-                            <div id="v-links" class="flex gap-3 items-center text-xs font-bold text-slate-300"><i data-feather="circle" class="w-4 h-4"></i> 2+ Links</div>
-                        </div>
-
-                        <div class="grid lg:grid-cols-2 gap-8">
+                        <div class="space-y-8">
                             <div class="h-64"><canvas id="visitsChart"></canvas></div>
-                            <div id="world-map" class="h-64 rounded-2xl overflow-hidden bg-slate-100"></div>
+                            <div id="map"></div>
                         </div>
                     </div>
                 </div>
@@ -158,14 +145,12 @@
             <div class="lg:col-span-5">
                 <div id="phone-preview" class="mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col">
                     <div class="flex-1 overflow-y-auto scrollbar-hide p-8 text-center flex flex-col items-center">
-                        <div class="relative mb-4 mt-6">
+                        <div class="relative mt-6 mb-4">
                             <img id="preview-img" class="w-24 h-24 rounded-full border-4 border-white/10 shadow-xl object-cover bg-slate-700">
-                            <div id="preview-v-badge" class="hidden absolute -right-1 bottom-0">
-                                <svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>
-                            </div>
+                            <div id="verification-badge-container" class="absolute -right-1 bottom-0"></div>
                         </div>
                         <h2 id="preview-name" class="font-black text-xl mb-1 tracking-tight"></h2>
-                        <p id="preview-bio" class="text-[11px] opacity-80 px-4 mb-8 leading-relaxed"></p>
+                        <p id="preview-bio" class="text-[11px] opacity-80 px-4 mb-8"></p>
                         <div id="preview-links" class="w-full space-y-3"></div>
                     </div>
                 </div>
@@ -174,21 +159,19 @@
     </main>
 
     <script>
+        const MAPTILER_KEY = 'iFCe8tlBYnpPH7TsEpUI';
         const SUPABASE_URL = 'https://xcicvuqdoztxhidwdmlc.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentUser = null;
-        let selectedTheme = 'default';
-        let visitChart = null;
-        let cachedProfile = null;
-        let cachedLinks = [];
+        let currentUser = null, selectedTheme = 'default', visitChart = null, cachedProfile = null, cachedLinks = [];
+
+        const goldBadge = `<svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
+        const standardBadge = `<svg width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
 
         const themeConfig = {
             default: { bg: '#0f172a', btn: 'bg-white/10 text-white border-white/10', text: 'text-white' },
             sunset: { bg: 'linear-gradient(135deg, #fb923c, #db2777)', btn: 'bg-white text-orange-600 border-transparent', text: 'text-white' },
-            forest: { bg: '#064e3b', btn: 'bg-emerald-500 text-white border-transparent', text: 'text-emerald-50' },
-            cotton: { bg: '#fdf2f8', btn: 'bg-pink-500 text-white border-transparent', text: 'text-pink-900' },
             glass: { bg: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe) center/cover', btn: 'bg-white/20 backdrop-blur-md text-white border-white/30', text: 'text-white' }
         };
 
@@ -201,19 +184,14 @@
         }
 
         async function loadAll() {
-            const { data: p, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
-            if (!p) {
-                await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]);
-                location.reload();
-                return;
-            }
-            const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUser.id);
+            const { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+            const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', currentUser.id).order('order_index', { ascending: true });
             cachedProfile = p;
             cachedLinks = links || [];
             selectedTheme = p.theme_id || 'default';
             updateForms();
             updatePreview();
-            if (p.is_business) loadAnalytics();
+            loadAnalytics();
             feather.replace();
         }
 
@@ -222,20 +200,31 @@
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
-            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-            const currentThemeEl = document.getElementById('theme-' + selectedTheme);
-            if (currentThemeEl) currentThemeEl.classList.add('active');
-            document.getElementById('pro-social-fields').classList.toggle('hidden', !p.is_business);
-            document.getElementById('biz-promo').classList.toggle('hidden', p.is_business);
+            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
             const list = document.getElementById('links-editor-list');
-            list.innerHTML = cachedLinks.map(l => `
-                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100">
-                    <div class="truncate"><p class="font-bold text-sm">${l.label}</p></div>
+            list.innerHTML = cachedLinks.map((l, index) => `
+                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="flex flex-col gap-1">
+                            <button onclick="reorderLink(${index}, -1)" class="p-1 hover:bg-slate-50 rounded text-slate-400"><i data-feather="chevron-up" class="w-3 h-3"></i></button>
+                            <button onclick="reorderLink(${index}, 1)" class="p-1 hover:bg-slate-50 rounded text-slate-400"><i data-feather="chevron-down" class="w-3 h-3"></i></button>
+                        </div>
+                        <div class="truncate"><p class="font-bold text-sm">${l.label}</p></div>
+                    </div>
                     <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
             feather.replace();
+        }
+
+        async function reorderLink(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= cachedLinks.length) return;
+            const itemA = cachedLinks[index];
+            const itemB = cachedLinks[newIndex];
+            await supabaseClient.from('links').update({ order_index: newIndex }).eq('id', itemA.id);
+            await supabaseClient.from('links').update({ order_index: index }).eq('id', itemB.id);
+            loadAll();
         }
 
         function updatePreview() {
@@ -243,56 +232,57 @@
             const theme = themeConfig[selectedTheme] || themeConfig.default;
             const preview = document.getElementById('phone-preview');
             preview.style.background = theme.bg;
-            if (theme.bg.includes('url')) preview.style.backgroundSize = 'cover';
             preview.className = `mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col ${theme.text}`;
             document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
-            const linksCont = document.getElementById('preview-links');
-            linksCont.innerHTML = cachedLinks.map(l => `
-                <div class="p-4 rounded-2xl font-black text-sm text-center border shadow-sm ${theme.btn}">
-                    ${l.label}
-                </div>
-            `).join('');
-            checkVerification(p, cachedLinks.length);
-        }
-
-        async function checkVerification(p, count) {
-            const v = {
-                biz: p.is_business === true,
-                handle: !!p.handle && p.handle.length > 1,
-                bio: !!p.bio && p.bio.length > 2,
-                avatar: !!p.avatar_url && p.avatar_url.includes('http'),
-                links: count >= 2
-            };
-            const isEligible = Object.values(v).every(Boolean);
-            document.getElementById('preview-v-badge').classList.toggle('hidden', !isEligible);
-            const badge = document.getElementById('v-status-badge');
-            if(badge) {
-                badge.innerText = isEligible ? 'Verified' : 'Pending Verification';
-                badge.className = isEligible ? 'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-green-100 text-green-600' : 'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-600';
-            }
-            const step = (id, ok) => {
-                const el = document.getElementById(id);
-                if(!el) return;
-                const icon = el.querySelector('i');
-                el.className = ok ? 'flex gap-3 items-center text-xs font-bold text-green-600' : 'flex gap-3 items-center text-xs font-bold text-slate-300';
-                if(icon) icon.setAttribute('data-feather', ok ? 'check-circle' : 'circle');
-            };
-            step('v-biz', v.biz); step('v-handle', v.handle); step('v-bio', v.bio); step('v-avatar', v.avatar); step('v-links', v.links);
-            feather.replace();
-            if (p.is_verified !== isEligible) {
-                await supabaseClient.from('profiles').update({ is_verified: isEligible }).eq('id', currentUser.id);
-                cachedProfile.is_verified = isEligible;
+            document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-4 rounded-2xl font-black text-sm text-center border ${theme.btn}">${l.label}</div>`).join('');
+            
+            const badgeContainer = document.getElementById('verification-badge-container');
+            if (p.is_verified) {
+                badgeContainer.innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
+            } else {
+                badgeContainer.innerHTML = '';
             }
         }
 
-        function setTheme(id) {
-            selectedTheme = id;
-            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-            const el = document.getElementById('theme-' + id);
-            if (el) el.classList.add('active');
-            updatePreview();
+        async function loadAnalytics() {
+            const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
+            const { data: clicks } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
+            const { data: dailyData } = await supabaseClient.from('daily_stats').select('*').eq('profile_id', currentUser.id).limit(7);
+
+            const visitCount = visits?.length || 0;
+            const clickCount = clicks?.length || 0;
+            const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
+            
+            document.getElementById('stat-visits').innerText = visitCount;
+            document.getElementById('stat-clicks').innerText = clickCount;
+            document.getElementById('stat-ctr').innerText = ctr + '%';
+            document.getElementById('stat-countries').innerText = [...new Set(visits?.map(v => v.country_code))].length;
+
+            new maplibregl.Map({
+                container: 'map',
+                style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
+                center: [0, 20],
+                zoom: 1
+            });
+
+            if (visitChart) visitChart.destroy();
+            visitChart = new Chart(document.getElementById('visitsChart'), {
+                type: 'line',
+                data: {
+                    labels: dailyData?.map(d => d.visit_date) || ['Day 1'],
+                    datasets: [{ 
+                        label: 'Visits', 
+                        data: dailyData?.map(d => d.visit_count) || [0], 
+                        borderColor: '#6366f1', 
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4 
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         }
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
@@ -303,19 +293,14 @@
                 theme_id: selectedTheme
             };
             const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
-            if (!error) { 
-                showModal("Success", "Profile and theme updated!", "check-circle"); 
-                loadAll(); 
-            } else {
-                showModal("Error", "That handle is already taken.", "alert-circle");
-            }
+            if (!error) { showModal("Success", "Appearance updated!", "check-circle"); loadAll(); }
         });
 
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const label = document.getElementById('link-label').value;
             const url = document.getElementById('link-url').value;
             if(!label || !url) return;
-            await supabaseClient.from('links').insert([{ user_id: currentUser.id, label, url }]);
+            await supabaseClient.from('links').insert([{ user_id: currentUser.id, label, url, order_index: cachedLinks.length }]);
             document.getElementById('link-label').value = '';
             document.getElementById('link-url').value = '';
             loadAll();
@@ -326,58 +311,32 @@
             loadAll();
         }
 
-        async function loadAnalytics() {
-            const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
-            const countries = {};
-            visits?.forEach(v => countries[v.country_code] = (countries[v.country_code] || 0) + 1);
-            const mapData = Object.entries(countries).map(([c, val]) => [c.toLowerCase(), val]);
-            Highcharts.mapChart('world-map', {
-                chart: { backgroundColor: 'transparent' },
-                title: { text: null },
-                credits: { enabled: false },
-                mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom' } },
-                series: [{ data: mapData, name: 'Visits', states: { hover: { color: '#6366f1' } } }]
-            });
-            if (visitChart) visitChart.destroy();
-            const ctx = document.getElementById('visitsChart').getContext('2d');
-            visitChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{ label: 'Weekly Visits', data: [5, 12, 8, 15, 22, 18, 25], borderColor: '#6366f1', tension: 0.4, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }]
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
-                }
-            });
+        function setTheme(id) {
+            selectedTheme = id;
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('theme-' + id).classList.add('active');
+            updatePreview();
         }
 
         function switchTab(t) {
-            ['links','style','social','business'].forEach(s => {
-                const sec = document.getElementById('section-'+s);
-                const tab = document.getElementById('tab-'+s);
-                if(sec) sec.classList.add('hidden');
-                if(tab) tab.classList.remove('active-tab');
+            ['links','style','business'].forEach(s => {
+                document.getElementById('section-'+s).classList.add('hidden');
+                document.getElementById('tab-'+s).classList.remove('active-tab');
             });
-            const activeSec = document.getElementById('section-'+t);
-            const activeTab = document.getElementById('tab-'+t);
-            if(activeSec) activeSec.classList.remove('hidden');
-            if(activeTab) activeTab.classList.add('active-tab');
+            document.getElementById('section-'+t).classList.remove('hidden');
+            document.getElementById('tab-'+t).classList.add('active-tab');
         }
 
         function copyPublicLink() {
             navigator.clipboard.writeText(document.getElementById('public-url-display').innerText);
-            showModal("Copied", "Link copied to clipboard!", "copy");
+            showModal("Copied", "Link copied!", "copy");
         }
 
         function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
-        
-        function showModal(t, m, iconName = "bell") {
+        function showModal(t, m, i) {
             document.getElementById('modal-title').innerText = t;
             document.getElementById('modal-message').innerText = m;
-            document.getElementById('modal-feather-icon').setAttribute('data-feather', iconName);
+            document.getElementById('modal-feather-icon').setAttribute('data-feather', i);
             document.getElementById('modal-container').classList.remove('hidden');
             feather.replace();
         }

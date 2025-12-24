@@ -10,10 +10,10 @@
     <style>
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
-
     <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
             <i data-feather="layers"></i><span>LinkStack</span>
@@ -23,7 +23,7 @@
         </div>
     </nav>
 
-    <main class="pt-24">
+    <main id="main-content" class="pt-24">
         <section class="max-w-7xl mx-auto px-6 py-20 text-center">
             <span class="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest mb-6 inline-block">The ultimate link in bio</span>
             <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9]">Everything you are <br><span class="text-indigo-600">in one simple link.</span></h1>
@@ -64,39 +64,65 @@
             document.getElementById('auth-section').scrollIntoView({ behavior: 'smooth' });
         }
 
+        async function init() {
+            feather.replace();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const handle = urlParams.get('u');
+
+            if (handle) {
+                document.getElementById('main-content').classList.add('opacity-0');
+                const { data, error } = await supabaseClient
+                    .from('profiles')
+                    .select('handle')
+                    .eq('handle', handle.toLowerCase())
+                    .single();
+
+                if (data) {
+                    window.location.href = `/view?u=${handle}`;
+                } else {
+                    document.getElementById('main-content').classList.remove('opacity-0');
+                    showModal("Profile Not Found", "The handle you are looking for doesn't exist yet.");
+                }
+            } else {
+                checkUser();
+            }
+        }
+
         async function checkUser() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) window.location.href = '/dashboard.html';
         }
 
         document.getElementById('login-btn').addEventListener('click', async () => {
-            const { error } = await supabaseClient.auth.signInWithPassword({ 
-                email: document.getElementById('email').value, 
-                password: document.getElementById('password').value 
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
             });
             if (!error) window.location.href = '/dashboard.html';
             else showModal("Auth Error", error.message);
         });
 
         document.getElementById('signup-btn').addEventListener('click', async () => {
-            const { error } = await supabaseClient.auth.signUp({ 
-                email: document.getElementById('email').value, 
-                password: document.getElementById('password').value 
+            const { error } = await supabaseClient.auth.signUp({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
             });
             if (!error) showModal("Success", "Check your email for the confirmation link.");
             else showModal("Auth Error", error.message);
         });
 
-        function showModal(t, m) { 
-            document.getElementById('modal-title').innerText = t; 
-            document.getElementById('modal-message').innerText = m; 
-            document.getElementById('modal-container').classList.remove('hidden'); 
+        function showModal(t, m) {
+            document.getElementById('modal-title').innerText = t;
+            document.getElementById('modal-message').innerText = m;
+            document.getElementById('modal-container').classList.remove('hidden');
         }
-        
-        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
 
-        feather.replace();
-        checkUser();
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        init();
     </script>
 </body>
 </html>

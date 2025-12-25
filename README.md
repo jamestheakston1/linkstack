@@ -6,4 +6,4 @@
  
 
 ## Status page
-Coming Soon
+https://linkstack.instatus.com

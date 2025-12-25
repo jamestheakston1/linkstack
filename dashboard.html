@@ -19,7 +19,7 @@
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
         .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1.25rem; }
         .theme-card.active { border-color: #6366f1; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        #map { width: 100%; height: 300px; border-radius: 1.5rem; }
+        #map { width: 100%; height: 240px; border-radius: 1.5rem; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -34,7 +34,7 @@
             </div>
             <h3 id="modal-title" class="text-2xl font-black mb-2">Notification</h3>
             <p id="modal-message" class="text-slate-600 mb-8 text-sm leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition">
+            <button onclick="closeModal()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition">
                 Dismiss
             </button>
         </div>
@@ -55,8 +55,8 @@
             <div class="lg:col-span-7 space-y-8">
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
-                        <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Live Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/...</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -65,7 +65,7 @@
 
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
                     <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap transition">Links</button>
-                    <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Appearance</button>
+                    <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Style</button>
                     <button onclick="switchTab('verification')" id="tab-verification" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Verification</button>
                     <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Analytics</button>
                 </div>
@@ -74,9 +74,9 @@
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-4">Add New Link</h3>
                         <div class="grid gap-3">
-                            <input type="text" id="link-label" placeholder="Link Label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                            <input type="url" id="link-url" placeholder="URL (https://...)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none">
-                            <button id="add-link-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mt-2 flex items-center justify-center gap-2">
+                            <input type="text" id="link-label" placeholder="Link Label (e.g. My Portfolio)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <input type="url" id="link-url" placeholder="URL (https://...)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <button id="add-link-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mt-2 flex items-center justify-center gap-2 hover:bg-slate-800 transition">
                                 <i data-feather="plus"></i> Add to Stack
                             </button>
                         </div>
@@ -89,9 +89,9 @@
                         <h3 class="text-lg font-black mb-6">Identity</h3>
                         <div class="space-y-4">
                             <input type="text" id="profile-handle" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Handle">
-                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Avatar URL">
-                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Bio..."></textarea>
-                            <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2">
+                            <input type="url" id="profile-avatar-url" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none" placeholder="Avatar Image URL">
+                            <textarea id="profile-bio" class="w-full px-4 py-3 bg-slate-50 border rounded-xl h-24 outline-none text-sm" placeholder="Tell the world about yourself..."></textarea>
+                            <button id="save-profile-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-indigo-700 transition">
                                 <i data-feather="save"></i> Save Appearance
                             </button>
                         </div>
@@ -108,33 +108,21 @@
 
                 <div id="section-verification" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                        <h3 class="text-2xl font-black mb-2">Verification Profile</h3>
-                        <p class="text-slate-500 text-sm mb-8">Complete these requirements to earn your badge.</p>
+                        <h3 class="text-2xl font-black mb-2">Verification</h3>
+                        <p class="text-slate-500 text-sm mb-8">Verification builds trust. Meet all criteria to unlock your badge.</p>
                         <div class="space-y-3" id="verification-checklist">
                             <div id="check-pro" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle"></i></div>
-                                    <span class="font-bold text-sm">Business Pro Status</span>
-                                </div>
-                                <a href="/business" class="text-xs font-black text-indigo-600">Get Pro</a>
+                                <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">Business Pro Status</span></div>
+                                <a href="/business" class="text-xs font-black text-indigo-600">Upgrade</a>
                             </div>
                             <div id="check-bio" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle"></i></div>
-                                    <span class="font-bold text-sm">Profile Bio</span>
-                                </div>
+                                <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">Profile Bio</span></div>
                             </div>
                             <div id="check-avatar" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle"></i></div>
-                                    <span class="font-bold text-sm">Profile Avatar</span>
-                                </div>
+                                <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">Profile Avatar</span></div>
                             </div>
                             <div id="check-links" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="status-icon"><i data-feather="circle"></i></div>
-                                    <span class="font-bold text-sm">2+ Active Links</span>
-                                </div>
+                                <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">2+ Active Links</span></div>
                             </div>
                         </div>
                         <div id="verification-action-area" class="mt-8"></div>
@@ -144,52 +132,27 @@
                 <div id="section-business" class="hidden space-y-6">
                     <div id="business-paywall" class="hidden">
                         <div class="bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
-                            <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-                                <i data-feather="bar-chart-2" class="w-10 h-10"></i>
-                            </div>
-                            <h3 class="text-3xl font-black mb-4">Unlock Business Pro to see your analytics</h3>
-                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights into your audience, visit tracking, and link performance.</p>
-                            <button onclick="window.location.href='/business'" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                                Get Business
-                            </button>
+                            <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6"><i data-feather="bar-chart-2" class="w-10 h-10"></i></div>
+                            <h3 class="text-3xl font-black mb-4">Unlock Business Pro</h3>
+                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights, visit tracking, and link performance.</p>
+                            <button onclick="window.location.href='/business'" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition">Get Started</button>
                         </div>
                     </div>
-
                     <div id="business-content" class="hidden space-y-6">
                         <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                            <h3 class="text-2xl font-black mb-8">Performance</h3>
+                            <h3 class="text-2xl font-black mb-8">Analytics</h3>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visits</p>
-                                    <p id="stat-visits" class="text-2xl font-black">0</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clicks</p>
-                                    <p id="stat-clicks" class="text-2xl font-black">0</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p>
-                                    <p id="stat-ctr" class="text-2xl font-black">0%</p>
-                                </div>
-                                <div class="p-4 bg-slate-50 rounded-2xl text-center">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Countries</p>
-                                    <p id="stat-countries" class="text-2xl font-black">0</p>
-                                </div>
+                                <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visits</p><p id="stat-visits" class="text-2xl font-black">0</p></div>
+                                <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clicks</p><p id="stat-clicks" class="text-2xl font-black">0</p></div>
+                                <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p><p id="stat-ctr" class="text-2xl font-black">0%</p></div>
+                                <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Geo</p><p id="stat-countries" class="text-2xl font-black">0</p></div>
                             </div>
                             <div class="h-64 mb-8"><canvas id="visitsChart"></canvas></div>
-                            <div id="map"></div>
+                            <div id="map" class="mb-8"></div>
                             
-                            <div class="mt-12 pt-8 border-t border-slate-100">
-                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Subscription Settings</h4>
-                                <div class="p-6 bg-slate-50 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div>
-                                        <p class="font-bold text-slate-900">Downgrade Account</p>
-                                        <p class="text-xs text-slate-500">Switching to a Personal account will hide your analytics and remove your verification badge.</p>
-                                    </div>
-                                    <button onclick="downgradeToPersonal()" class="px-6 py-3 bg-white border border-slate-200 text-red-600 font-bold text-xs rounded-xl hover:bg-red-50 hover:border-red-100 transition">
-                                        Switch back to Personal
-                                    </button>
-                                </div>
+                            <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
+                                <p class="text-xs text-slate-400 font-bold">Business Pro Active</p>
+                                <button onclick="downgradeToPersonal()" class="text-xs font-bold text-red-500 hover:text-red-700 transition">Switch back to Personal</button>
                             </div>
                         </div>
                     </div>
@@ -220,8 +183,8 @@
 
         let currentUser = null, selectedTheme = 'default', visitChart = null, cachedProfile = null, cachedLinks = [];
 
-        const goldBadge = `<svg width="28" height="28" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
-        const standardBadge = `<svg width="28" height="28" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
+        const goldBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
+        const standardBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
 
         const themeConfig = {
             default: { bg: '#0f172a', btn: 'bg-white/10 text-white border-white/10', text: 'text-white' },
@@ -237,17 +200,14 @@
         }
 
         async function loadAll() {
+            // Load Profile
             let { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
-            
             if (!p) {
-                const { data: newProfile } = await supabaseClient.from('profiles').insert([{ 
-                    id: currentUser.id, 
-                    handle: currentUser.email.split('@')[0], 
-                    theme_id: 'default' 
-                }]).select().single();
-                p = newProfile;
+                const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]).select().single();
+                p = newP;
             }
 
+            // Load Links
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', currentUser.id).order('order_index', { ascending: true });
             
             cachedProfile = p;
@@ -269,35 +229,79 @@
             feather.replace();
         }
 
-        async function downgradeToPersonal() {
-            if (!confirm("Are you sure you want to downgrade? You will lose access to analytics and your verification badge.")) return;
-            
-            const { error } = await supabaseClient.from('profiles').update({ 
-                is_business: false,
-                is_verified: false 
-            }).eq('id', currentUser.id);
+        // --- Link Management ---
+        document.getElementById('add-link-btn').addEventListener('click', async () => {
+            const label = document.getElementById('link-label').value.trim();
+            const url = document.getElementById('link-url').value.trim();
+            if(!label || !url) return showModal("Error", "Please fill in both fields", "alert-circle");
 
-            if (!error) {
-                showModal("Downgraded", "Your account has been switched back to Personal.", "user");
+            const { error } = await supabaseClient.from('links').insert([{ 
+                profile_id: currentUser.id, 
+                label, 
+                url, 
+                order_index: cachedLinks.length 
+            }]);
+
+            if(error) showModal("Error", error.message, "x-octagon");
+            else {
+                document.getElementById('link-label').value = '';
+                document.getElementById('link-url').value = '';
                 loadAll();
             }
+        });
+
+        async function deleteLink(id) {
+            await supabaseClient.from('links').delete().eq('id', id);
+            loadAll();
         }
 
+        async function reorderLink(index, dir) {
+            const newIdx = index + dir;
+            if(newIdx < 0 || newIdx >= cachedLinks.length) return;
+            const a = cachedLinks[index], b = cachedLinks[newIdx];
+            await supabaseClient.from('links').update({ order_index: newIdx }).eq('id', a.id);
+            await supabaseClient.from('links').update({ order_index: index }).eq('id', b.id);
+            loadAll();
+        }
+
+        // --- Profile Management ---
+        document.getElementById('save-profile-btn').addEventListener('click', async () => {
+            const updates = { 
+                handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), 
+                avatar_url: document.getElementById('profile-avatar-url').value, 
+                bio: document.getElementById('profile-bio').value, 
+                theme_id: selectedTheme 
+            };
+            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
+            if(error) showModal("Error", error.message, "x-octagon");
+            else {
+                loadAll();
+                showModal("Success", "Appearance updated!", "check");
+            }
+        });
+
+        async function downgradeToPersonal() {
+            if(!confirm("Are you sure? You will lose verification and analytics.")) return;
+            await supabaseClient.from('profiles').update({ is_business: false, is_verified: false }).eq('id', currentUser.id);
+            loadAll();
+        }
+
+        // --- UI Updates ---
         function updateForms() {
             const p = cachedProfile;
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
-            const list = document.getElementById('links-editor-list');
-            list.innerHTML = cachedLinks.map((l, index) => `
-                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm transition hover:shadow-md">
+            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
+            
+            document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
+                <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
-                        <div class="flex flex-col gap-1 text-slate-300">
+                        <div class="flex flex-col text-slate-300">
                             <button onclick="reorderLink(${index}, -1)" class="hover:text-indigo-600"><i data-feather="chevron-up" class="w-4 h-4"></i></button>
                             <button onclick="reorderLink(${index}, 1)" class="hover:text-indigo-600"><i data-feather="chevron-down" class="w-4 h-4"></i></button>
                         </div>
-                        <div class="truncate"><p class="font-bold text-sm">${l.label}</p></div>
+                        <p class="font-bold text-sm">${l.label}</p>
                     </div>
                     <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                 </div>
@@ -320,28 +324,14 @@
 
             const allMet = Object.values(checks).every(v => v === true);
             const actionArea = document.getElementById('verification-action-area');
-            if (p.is_verified) {
-                actionArea.innerHTML = `<div class="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl text-center"><h4 class="font-black text-indigo-900">You are Verified!</h4></div>`;
-            } else if (allMet) {
-                actionArea.innerHTML = `<button onclick="applyVerification()" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition">Claim Verification</button>`;
-            } else {
-                actionArea.innerHTML = `<div class="p-6 bg-slate-100 rounded-3xl text-center opacity-60"><p class="text-slate-500 text-sm font-bold">Complete all criteria to verify</p></div>`;
-            }
+            if (p.is_verified) actionArea.innerHTML = `<div class="p-6 bg-indigo-50 rounded-3xl text-center font-black text-indigo-600 border border-indigo-100">Verified Member</div>`;
+            else if (allMet) actionArea.innerHTML = `<button onclick="applyVerification()" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition">Claim Badge</button>`;
+            else actionArea.innerHTML = `<div class="p-6 bg-slate-100 rounded-3xl text-center text-slate-400 text-xs font-bold">Complete all tasks above to verify</div>`;
             feather.replace();
         }
 
         async function applyVerification() {
-            const { error } = await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id);
-            if (!error) { showModal("Verified!", "You are now verified.", "shield"); loadAll(); }
-        }
-
-        async function reorderLink(index, direction) {
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= cachedLinks.length) return;
-            const itemA = cachedLinks[index];
-            const itemB = cachedLinks[newIndex];
-            await supabaseClient.from('links').update({ order_index: newIndex }).eq('id', itemA.id);
-            await supabaseClient.from('links').update({ order_index: index }).eq('id', itemB.id);
+            await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id);
             loadAll();
         }
 
@@ -350,63 +340,39 @@
             const theme = themeConfig[selectedTheme] || themeConfig.default;
             const preview = document.getElementById('phone-preview');
             preview.style.background = theme.bg;
+            preview.style.backgroundSize = 'cover';
             preview.className = `mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col ${theme.text}`;
+            
             document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
-            document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-4 rounded-2xl font-black text-sm text-center border ${theme.btn}">${l.label}</div>`).join('');
-            const badgeContainer = document.getElementById('verification-badge-container');
-            if (p.is_verified) badgeContainer.innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
-            else badgeContainer.innerHTML = '';
+            document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-3 rounded-xl border font-bold text-sm ${theme.btn}">${l.label}</div>`).join('');
+            
+            const badge = document.getElementById('verification-badge-container');
+            badge.innerHTML = p.is_verified ? (p.handle === 'james' ? goldBadge : standardBadge) : '';
         }
 
         async function loadAnalytics() {
             const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
             const { data: clicks } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
-            const { data: dailyData } = await supabaseClient.from('daily_stats').select('*').eq('profile_id', currentUser.id).limit(7);
-            const visitCount = visits?.length || 0;
-            const clickCount = clicks?.length || 0;
-            const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
-            document.getElementById('stat-visits').innerText = visitCount;
-            document.getElementById('stat-clicks').innerText = clickCount;
-            document.getElementById('stat-ctr').innerText = ctr + '%';
-            document.getElementById('stat-countries').innerText = [...new Set(visits?.map(v => v.country_code))].length;
-            
-            const mapEl = document.getElementById('map');
-            mapEl.innerHTML = ''; 
+            document.getElementById('stat-visits').innerText = visits?.length || 0;
+            document.getElementById('stat-clicks').innerText = clicks?.length || 0;
+            const mapEl = document.getElementById('map'); mapEl.innerHTML = '';
             new maplibregl.Map({ container: 'map', style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`, center: [0, 20], zoom: 1 });
-            
-            if (visitChart) visitChart.destroy();
-            visitChart = new Chart(document.getElementById('visitsChart'), {
-                type: 'line',
-                data: {
-                    labels: dailyData?.map(d => d.visit_date) || ['Today'],
-                    datasets: [{ label: 'Visits', data: dailyData?.map(d => d.visit_count) || [0], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4 }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
         }
 
-        document.getElementById('save-profile-btn').addEventListener('click', async () => {
-            const updates = { handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), avatar_url: document.getElementById('profile-avatar-url').value, bio: document.getElementById('profile-bio').value, theme_id: selectedTheme };
-            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
-            if (!error) { showModal("Success", "Updated!", "check-circle"); loadAll(); }
-        });
-
-        document.getElementById('add-link-btn').addEventListener('click', async () => {
-            const label = document.getElementById('link-label').value;
-            const url = document.getElementById('link-url').value;
-            if(!label || !url) return;
-            await supabaseClient.from('links').insert([{ profile_id: currentUser.id, label, url, order_index: cachedLinks.length }]);
-            document.getElementById('link-label').value = ''; document.getElementById('link-url').value = ''; loadAll();
-        });
-
-        async function deleteLink(id) { await supabaseClient.from('links').delete().eq('id', id); loadAll(); }
-        function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-' + id).classList.add('active'); updatePreview(); }
+        // --- Navigation & Helpers ---
+        function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-'+id).classList.add('active'); updatePreview(); }
         function switchTab(t) { ['links','style','business','verification'].forEach(s => { document.getElementById('section-'+s).classList.add('hidden'); document.getElementById('tab-'+s).classList.remove('active-tab'); }); document.getElementById('section-'+t).classList.remove('hidden'); document.getElementById('tab-'+t).classList.add('active-tab'); }
-        function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Link copied!", "copy"); }
+        function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copied to clipboard.", "copy"); }
         function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
-        function showModal(t, m, i) { document.getElementById('modal-title').innerText = t; document.getElementById('modal-message').innerText = m; document.getElementById('modal-feather-icon').setAttribute('data-feather', i); document.getElementById('modal-container').classList.remove('hidden'); feather.replace(); }
+        function showModal(t, m, i) { 
+            document.getElementById('modal-title').innerText = t; 
+            document.getElementById('modal-message').innerText = m; 
+            document.getElementById('modal-feather-icon').setAttribute('data-feather', i); 
+            document.getElementById('modal-container').classList.remove('hidden'); 
+            feather.replace(); 
+        }
         
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();

@@ -216,8 +216,7 @@
                         <div class="bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
                             <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6"><i data-feather="bar-chart-2" class="w-10 h-10"></i></div>
                             <h3 class="text-3xl font-black mb-4">Unlock Business Pro</h3>
-                            <p class="text-slate-500 mb-6 max-w-sm mx-auto">Get deep insights, visit tracking, and link performance stats.</p>
-                            <p class="text-red-500 text-[10px] font-black uppercase tracking-widest mb-8">Strictly Prohibited: Impersonating registered businesses.</p>
+                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights, visit tracking, and link performance stats.</p>
                             <button id="upgrade-pro-btn" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition">Get Started for $0</button>
                         </div>
                     </div>
@@ -292,15 +291,14 @@
                     <input type="text" id="jasper-input" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-indigo-500">
                     <button type="submit" id="jasper-send" disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition-colors"><i data-feather="send" class="w-4 h-4"></i></button>
                 </form>
-                <div class="flex items-center justify-center gap-1.5 opacity-40">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Powered by Gemini 2.5 Flash</span>
-                </div>
             </div>
         </div>
-        <button id="toggle-jasper-btn" class="w-16 h-16 sparkle-btn text-white rounded-2xl shadow-xl hover:opacity-90 transition flex items-center justify-center hover:scale-105 active:scale-95">
+        <button id="toggle-jasper-btn" class="w-16 h-16 sparkle-btn text-white rounded-2xl shadow-xl hover:opacity-90 transition flex items-center justify-center hover:scale-105 active:scale-95 group relative">
+            <div id="jasper-lock-icon" class="absolute -top-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-full border-2 border-white hidden">
+                <i data-feather="lock" class="w-3 h-3"></i>
+            </div>
             <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11 2L13.8 8.2L20 11L13.8 13.8L11 20L8.2 13.8L2 11L8.2 8.2L11 2Z" fill="white"/>
-                <path d="M19 14L20 16.5L22.5 17.5L20 18.5L19 21L18 18.5L15.5 17.5L18 16.5L19 14Z" fill="white" opacity="0.65"/>
             </svg>
         </button>
     </div>
@@ -316,16 +314,21 @@
         
         let currentUser = null, selectedTheme = 'default', cachedProfile = null, cachedLinks = [], chartInstance = null, mapInstance = null;
         
-        const goldBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
-        const standardBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
-        
         const themeConfig = {
             default: { bg: '#0f172a', btn: 'bg-white/10 text-white border-white/10', text: 'text-white' },
             sunset: { bg: 'linear-gradient(135deg, #fb923c, #db2777)', btn: 'bg-white text-orange-600 border-transparent', text: 'text-white' },
             glass: { bg: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe) center/cover', btn: 'bg-white/20 backdrop-blur-md text-white border-white/30', text: 'text-white' }
         };
 
-        window.toggleJasper = () => { document.getElementById('jasper-chat-window').classList.toggle('open'); feather.replace(); };
+        window.toggleJasper = () => {
+            if (!cachedProfile?.is_business) {
+                showModal("Business Pro Feature", "Jasper AI is exclusive to Business Pro members. Upgrade to start chatting!", "lock");
+                return;
+            }
+            document.getElementById('jasper-chat-window').classList.toggle('open');
+            feather.replace();
+        };
+
         window.closeModal = () => { document.getElementById('modal-container').classList.add('hidden'); };
         window.switchTab = (t) => { 
             ['links','socials','style','business','verification'].forEach(s => { 
@@ -337,6 +340,7 @@
             document.getElementById('tab-'+t)?.classList.add('active-tab'); 
             document.getElementById('tab-'+t)?.classList.remove('text-slate-400');
         };
+
         window.deleteLink = async (id) => { await supabaseClient.from('links').delete().eq('id', id); loadAll(); };
         window.reorderLink = async (index, dir) => {
             const newIdx = index + dir;
@@ -352,7 +356,6 @@
             if (!session) return window.location.replace('/');
             currentUser = session.user;
             await loadAll();
-            initJasper();
             setupEventListeners();
         }
 
@@ -407,23 +410,20 @@
             document.getElementById('theme-default').onclick = () => setTheme('default');
             document.getElementById('theme-sunset').onclick = () => setTheme('sunset');
             document.getElementById('theme-glass').onclick = () => setTheme('glass');
-            document.getElementById('upgrade-shortcut-btn').onclick = () => switchTab('business');
-            document.getElementById('upgrade-pro-btn').onclick = () => {
-                window.location.href = '/business';
+            document.getElementById('upgrade-pro-btn').onclick = async () => {
+                if (!currentUser) return;
+                await supabaseClient.from('profiles').update({ is_business: true }).eq('id', currentUser.id);
+                loadAll();
+                showModal("Success", "Welcome to Business Pro! Jasper AI is now active.", "zap");
             };
             document.getElementById('downgrade-btn').onclick = async () => {
-                if(!confirm("Are you sure? Verification and analytics will be disabled.")) return;
-                await supabaseClient.from('profiles').update({ is_business: false, is_verified: false }).eq('id', currentUser.id);
+                await supabaseClient.from('profiles').update({ is_business: false }).eq('id', currentUser.id);
                 loadAll();
             };
-            document.getElementById('close-jasper-btn').onclick = window.toggleJasper;
-            document.getElementById('toggle-jasper-btn').onclick = window.toggleJasper;
             document.getElementById('jasper-form').onsubmit = handleJasperSubmit;
             document.getElementById('setup-handle-btn').onclick = async () => {
                 const handle = document.getElementById('setup-handle-input').value.toLowerCase().replace(/[^a-z0-9]/g, '');
-                if (handle.length < 3) return showModal("Wait", "Handle must be at least 3 characters.", "alert-circle");
-                const { error } = await supabaseClient.from('profiles').update({ handle }).eq('id', currentUser.id);
-                if (error) return showModal("Error", "Handle might be taken. Try another.", "x-circle");
+                await supabaseClient.from('profiles').update({ handle }).eq('id', currentUser.id);
                 document.getElementById('handle-modal').classList.add('hidden');
                 loadAll();
             };
@@ -438,106 +438,57 @@
             const typingIndicator = document.getElementById('jasper-typing-indicator');
             msgContainer.innerHTML += `<div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">${query}</div>`;
             input.value = '';
-            msgContainer.scrollTop = msgContainer.scrollHeight;
             typingIndicator.classList.remove('hidden');
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const { data } = await supabaseClient.functions.invoke('jasper-chat', {
+                headers: { Authorization: `Bearer ${session.access_token}` },
+                body: { message: query, context: { profile: cachedProfile, links: cachedLinks } }
+            });
+            typingIndicator.classList.add('hidden');
+            msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
             msgContainer.scrollTop = msgContainer.scrollHeight;
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) throw new Error("No session");
-                const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
-                    headers: { Authorization: `Bearer ${session.access_token}` },
-                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } }
-                });
-                if (error) throw error;
-                typingIndicator.classList.add('hidden');
-                msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
-            } catch (err) {
-                console.error("Jasper Error:", err);
-                typingIndicator.classList.add('hidden');
-                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Make sure you are signed in.</div>`;
-            }
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-        }
-
-        function initJasper() {
-            const jasperInput = document.getElementById('jasper-input');
-            const jasperSend = document.getElementById('jasper-send');
-            const jasperLoading = document.getElementById('jasper-loading');
-            const jasperMessages = document.getElementById('jasper-messages');
-            if (jasperInput && jasperSend) {
-                jasperInput.disabled = false;
-                jasperInput.classList.remove('opacity-50', 'bg-slate-50');
-                jasperInput.classList.add('bg-white');
-                jasperSend.disabled = false;
-                jasperSend.classList.remove('text-slate-300');
-                jasperSend.classList.add('text-indigo-600');
-                if (jasperLoading) jasperLoading.remove();
-                if (!jasperMessages.querySelector('.jasper-welcome')) {
-                    jasperMessages.innerHTML = `<div class="jasper-welcome self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">Hey there! I'm Jasper. I can analyze your LinkStack profile. Ask me anything!</div>`;
-                }
-            }
         }
 
         async function loadAll() {
             if (!currentUser) return;
             let { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
-            if (!p) {
-                const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, theme_id: 'default' }]).select().single();
-                p = newP;
-            }
-            if (!p.handle) {
-                document.getElementById('handle-modal').classList.remove('hidden');
-                feather.replace();
-            }
+            if (!p.handle) document.getElementById('handle-modal').classList.remove('hidden');
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', currentUser.id).order('order_index', { ascending: true });
             cachedProfile = p;
             cachedLinks = links || [];
             selectedTheme = p.theme_id || 'default';
-            updateForms();
-            updatePreview();
-            updateVerification();
+            const lockIcon = document.getElementById('jasper-lock-icon');
             if (p.is_business) {
+                lockIcon.classList.add('hidden');
                 document.getElementById('business-content').classList.remove('hidden');
                 document.getElementById('business-paywall').classList.add('hidden');
                 document.getElementById('pro-socials-container').classList.remove('hidden');
                 document.getElementById('socials-upsell').classList.add('hidden');
+                const jasperLoading = document.getElementById('jasper-loading');
+                if (jasperLoading) jasperLoading.remove();
+                document.getElementById('jasper-input').disabled = false;
+                document.getElementById('jasper-send').disabled = false;
                 setTimeout(loadAnalytics, 100);
             } else {
+                lockIcon.classList.remove('hidden');
                 document.getElementById('business-paywall').classList.remove('hidden');
                 document.getElementById('business-content').classList.add('hidden');
-                document.getElementById('pro-socials-container').classList.add('hidden');
-                document.getElementById('socials-upsell').classList.remove('hidden');
             }
+            updateForms();
+            updatePreview();
+            updateVerification();
             feather.replace();
         }
 
         function updateForms() {
             const p = cachedProfile;
-            if(!p) return;
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
             document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
-            
-            const sd = p.socials_data || {};
-            document.getElementById('social-instagram').value = sd.instagram || '';
-            document.getElementById('social-youtube').value = sd.youtube || '';
-            document.getElementById('social-twitter').value = sd.twitter || '';
-            document.getElementById('social-tiktok').value = sd.tiktok || '';
-            document.getElementById('social-linkedin').value = sd.linkedin || '';
-            document.getElementById('social-twitch').value = sd.twitch || '';
-            document.getElementById('social-discord').value = sd.discord || '';
-            document.getElementById('social-spotify').value = sd.spotify || '';
-
             document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
                 <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="flex flex-col text-slate-300">
-                            <button onclick="reorderLink(${index}, -1)" class="hover:text-indigo-600"><i data-feather="chevron-up" class="w-4 h-4"></i></button>
-                            <button onclick="reorderLink(${index}, 1)" class="hover:text-indigo-600"><i data-feather="chevron-down" class="w-4 h-4"></i></button>
-                        </div>
-                        <p class="font-bold text-sm">${l.label}</p>
-                    </div>
+                    <p class="font-bold text-sm">${l.label}</p>
                     <button onclick="deleteLink('${l.id}')" class="text-red-400 p-2 hover:bg-red-50 rounded-lg transition"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
@@ -546,140 +497,40 @@
 
         function updateVerification() {
             const p = cachedProfile;
-            if(!p) return;
-            const checks = { pro: p.is_business, bio: !!p.bio && p.bio.length > 3, avatar: !!p.avatar_url, links: cachedLinks.length >= 2 };
+            const checks = { pro: p.is_business, bio: !!p.bio, avatar: !!p.avatar_url, links: cachedLinks.length >= 2 };
             const updateItem = (id, met) => {
                 const el = document.getElementById(id);
                 el.querySelector('.status-icon').innerHTML = met ? `<i data-feather="check-circle" class="text-green-500"></i>` : `<i data-feather="circle" class="text-slate-300"></i>`;
-                el.className = `flex items-center justify-between p-4 rounded-2xl ${met ? 'bg-green-50' : 'bg-slate-50'}`;
             };
             updateItem('check-pro', checks.pro);
             updateItem('check-bio', checks.bio);
             updateItem('check-avatar', checks.avatar);
             updateItem('check-links', checks.links);
-            const allMet = Object.values(checks).every(v => v === true);
-            const actionArea = document.getElementById('verification-action-area');
-            if (p.is_verified) actionArea.innerHTML = `<div class="p-6 bg-indigo-50 rounded-3xl text-center font-black text-indigo-600 border border-indigo-100">Verified Member</div>`;
-            else if (allMet) {
-                const btn = document.createElement('button');
-                btn.className = "w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition";
-                btn.innerText = "Claim Badge";
-                btn.onclick = async () => { if(!currentUser) return; await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id); loadAll(); };
-                actionArea.innerHTML = '';
-                actionArea.appendChild(btn);
-            } else actionArea.innerHTML = `<div class="p-6 bg-slate-100 rounded-3xl text-center text-slate-400 text-xs font-bold">Complete all tasks to verify</div>`;
             feather.replace();
         }
 
         function updatePreview() {
             const p = cachedProfile;
-            if(!p) return;
             const theme = themeConfig[selectedTheme] || themeConfig.default;
             const preview = document.getElementById('phone-preview');
             preview.style.background = theme.bg;
-            preview.style.backgroundSize = 'cover';
-            preview.className = `mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col ${theme.text}`;
             document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
-            
-            const sd = p.socials_data || {};
-            const socialIcons = [
-                { id: 'instagram', icon: 'instagram' },
-                { id: 'youtube', icon: 'youtube' },
-                { id: 'twitter', icon: 'twitter' },
-                { id: 'tiktok', icon: 'music' },
-                { id: 'linkedin', icon: 'linkedin' },
-                { id: 'twitch', icon: 'tv' },
-                { id: 'discord', icon: 'hash' },
-                { id: 'spotify', icon: 'disc' }
-            ];
-            
-            const activeSocials = socialIcons.filter(s => sd[s.id]);
-            document.getElementById('preview-socials').innerHTML = activeSocials.map(s => `
-                <div class="w-8 h-8 rounded-full flex items-center justify-center border ${theme.btn} opacity-80 hover:opacity-100 transition-opacity">
-                    <i data-feather="${s.icon}" class="w-4 h-4"></i>
-                </div>
-            `).join('');
-
             document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-3 rounded-xl border font-bold text-sm ${theme.btn}">${l.label}</div>`).join('');
-            const badge = document.getElementById('verification-badge-container');
-            badge.innerHTML = p.is_verified ? (p.handle === 'james' ? goldBadge : standardBadge) : '';
             feather.replace();
         }
 
         async function loadAnalytics() {
-            if(!currentUser) return;
-            let visitsData = [];
-            let clicksData = [];
-            try {
-                const { data: v } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
-                visitsData = v || [];
-            } catch(e) {}
-            try {
-                const { data: c } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
-                clicksData = c || [];
-            } catch(e) {}
-            const visitCount = visitsData.length;
-            const clickCount = clicksData.length;
-            const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
-            document.getElementById('stat-visits').innerText = visitCount;
-            document.getElementById('stat-clicks').innerText = clickCount;
-            document.getElementById('stat-ctr').innerText = ctr + '%';
-            const countryMap = {};
-            visitsData.forEach(v => { if(v.country) countryMap[v.country] = (countryMap[v.country] || 0) + 1; });
-            document.getElementById('stat-countries').innerText = Object.keys(countryMap).length;
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const visitFreq = [0,0,0,0,0,0,0];
-            visitsData.forEach(v => {
-                const d = new Date(v.created_at).getDay();
-                visitFreq[d]++;
-            });
+            const { data: v } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
+            document.getElementById('stat-visits').innerText = v.length;
             const canvas = document.getElementById('visitsChart');
             if (canvas) {
                 if (chartInstance) chartInstance.destroy();
                 chartInstance = new Chart(canvas.getContext('2d'), {
                     type: 'line',
-                    data: {
-                        labels: days,
-                        datasets: [{
-                            label: 'Visits',
-                            data: visitFreq,
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
-                    }
-                });
-            }
-            const mapEl = document.getElementById('map');
-            if (mapEl) {
-                mapEl.innerHTML = '';
-                mapInstance = new maplibregl.Map({
-                    container: 'map',
-                    style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
-                    center: [0, 20],
-                    zoom: 1
-                });
-                const countryCoords = { 'US': [-95.7, 37.1], 'GB': [-3.4, 55.4], 'FR': [2.2, 46.2], 'DE': [10.5, 51.2], 'IN': [79.0, 20.6], 'CA': [-106.3, 56.1], 'AU': [133.8, -25.3], 'BR': [-51.9, -14.2], 'JP': [138.3, 36.2] };
-                Object.entries(countryMap).forEach(([code, count]) => {
-                    const coords = countryCoords[code] || [0, 0];
-                    if(coords[0] !== 0) {
-                        const el = document.createElement('div');
-                        el.className = 'w-6 h-6 bg-indigo-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[8px] text-white font-bold';
-                        el.innerText = count;
-                        new maplibregl.Marker(el).setLngLat(coords).addTo(mapInstance);
-                    }
+                    data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ data: [0,0,0,0,0,0,0], borderColor: '#6366f1' }] },
+                    options: { responsive: true, maintainAspectRatio: false }
                 });
             }
         }

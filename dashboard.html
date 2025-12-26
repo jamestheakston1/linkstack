@@ -20,6 +20,18 @@
         .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1.25rem; }
         .theme-card.active { border-color: #6366f1; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         #map { width: 100%; height: 240px; border-radius: 1.5rem; }
+
+        #jasper-chat-window {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #jasper-chat-window.open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -40,7 +52,7 @@
         </div>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-40 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.reload()">
             <i data-feather="layers"></i><span>LinkStack</span>
         </div>
@@ -51,12 +63,11 @@
 
     <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
         <section class="grid lg:grid-cols-12 gap-12">
-            
             <div class="lg:col-span-7 space-y-8">
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -175,6 +186,46 @@
         </section>
     </main>
 
+    <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
+        <div id="jasper-chat-window" class="w-[350px] max-w-[calc(100vw-3rem)] h-[500px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-indigo-600 text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                        <i data-feather="cpu" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="font-black text-sm tracking-tight">Chat with Jasper</span>
+                </div>
+                <button onclick="toggleJasper()" class="p-2 hover:bg-white/10 rounded-full transition">
+                    <i data-feather="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
+                    <i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i>
+                </div>
+                <p class="text-slate-900 font-bold mb-1">Jasper is being prepared</p>
+                <p class="text-slate-400 text-xs px-8">Jasper is not yet available to chat. Please check back later!</p>
+            </div>
+
+            <div class="p-6 border-t border-slate-50">
+                <div class="relative mb-3">
+                    <input type="text" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none opacity-50 cursor-not-allowed">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300">
+                        <i data-feather="send" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-1.5 opacity-40">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Powered by Gemini 2.5 Flash</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="toggleJasper()" class="w-16 h-16 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition flex items-center justify-center hover:scale-105 active:scale-95">
+            <i data-feather="message-circle" class="w-8 h-8"></i>
+        </button>
+    </div>
+
     <script>
         const MAPTILER_KEY = 'iFCe8tlBYnpPH7TsEpUI';
         const SUPABASE_URL = 'https://xcicvuqdoztxhidwdmlc.supabase.co';
@@ -200,14 +251,12 @@
         }
 
         async function loadAll() {
-            // Load Profile
             let { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
             if (!p) {
                 const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]).select().single();
                 p = newP;
             }
 
-            // Load Links
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', currentUser.id).order('order_index', { ascending: true });
             
             cachedProfile = p;
@@ -229,7 +278,6 @@
             feather.replace();
         }
 
-        // --- Link Management ---
         document.getElementById('add-link-btn').addEventListener('click', async () => {
             const label = document.getElementById('link-label').value.trim();
             const url = document.getElementById('link-url').value.trim();
@@ -264,7 +312,6 @@
             loadAll();
         }
 
-        // --- Profile Management ---
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
             const updates = { 
                 handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), 
@@ -286,7 +333,6 @@
             loadAll();
         }
 
-        // --- UI Updates ---
         function updateForms() {
             const p = cachedProfile;
             document.getElementById('profile-handle').value = p.handle || '';
@@ -361,7 +407,12 @@
             new maplibregl.Map({ container: 'map', style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`, center: [0, 20], zoom: 1 });
         }
 
-        // --- Navigation & Helpers ---
+        function toggleJasper() {
+            const chat = document.getElementById('jasper-chat-window');
+            chat.classList.toggle('open');
+            feather.replace();
+        }
+
         function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-'+id).classList.add('active'); updatePreview(); }
         function switchTab(t) { ['links','style','business','verification'].forEach(s => { document.getElementById('section-'+s).classList.add('hidden'); document.getElementById('tab-'+s).classList.remove('active-tab'); }); document.getElementById('section-'+t).classList.remove('hidden'); document.getElementById('tab-'+t).classList.add('active-tab'); }
         function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copied to clipboard.", "copy"); }

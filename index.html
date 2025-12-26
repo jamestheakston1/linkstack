@@ -79,8 +79,6 @@
                 <h4 class="font-black text-sm uppercase tracking-widest text-slate-900 mb-6">Legal</h4>
                 <ul class="space-y-4 text-sm font-bold text-slate-400">
                     <li><a href="/privacy" class="hover:text-indigo-600 transition">Privacy Policy</a></li>
-                </ul>
-                <ul class="space-y-4 text-sm font-bold text-slate-400">
                     <li><a href="/terms" class="hover:text-indigo-600 transition">Terms of Service</a></li>
                 </ul>
             </div>
@@ -120,7 +118,20 @@
 
             <div id="auth-form" class="hidden pt-4">
                 <button onclick="backToSelection()" class="text-xs font-bold text-indigo-600 mb-6 flex items-center gap-1"><i data-feather="arrow-left" class="w-3 h-3"></i> Back to options</button>
-                <h3 id="form-title" class="text-3xl font-black mb-8 tracking-tighter">Account</h3>
+                <h3 id="form-title" class="text-3xl font-black mb-6 tracking-tighter text-center">Account</h3>
+                
+                <div class="mb-6">
+                    <button onclick="handleOAuth('github')" class="w-full flex items-center justify-center gap-3 py-4 border-2 border-slate-100 rounded-2xl font-black text-sm hover:bg-slate-50 transition">
+                        <i data-feather="github" class="w-5 h-5"></i>
+                        Continue with GitHub
+                    </button>
+                </div>
+
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
+                    <div class="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-slate-400"><span class="bg-white px-4">Or use email</span></div>
+                </div>
+
                 <div class="space-y-4">
                     <input type="email" id="email" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Email Address">
                     <input type="password" id="password" class="w-full px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20" placeholder="Password">
@@ -216,6 +227,16 @@
             });
             if (!error) showMsg("Success", "Check your email for the confirmation link.", "check-circle");
             else showMsg("Auth Error", error.message, "alert-circle");
+        }
+
+        async function handleOAuth(provider) {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: provider,
+                options: {
+                    redirectTo: window.location.origin + '/dashboard.html'
+                }
+            });
+            if (error) showMsg("OAuth Error", error.message, "alert-circle");
         }
 
         function showMsg(t, m, icon = "bell") {

@@ -69,7 +69,7 @@
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -368,7 +368,7 @@
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
+            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
             
             document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
                 <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">

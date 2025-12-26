@@ -58,7 +58,7 @@
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -285,7 +285,7 @@
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
+            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
             document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
                 <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -369,54 +369,59 @@
 
         async function loadAnalytics() {
             if(!currentUser) return;
-            const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
-            const { data: clicks } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
-            
-            const visitCount = visits?.length || 0;
-            const clickCount = clicks?.length || 0;
+            let visitsData = [];
+            let clicksData = [];
+            try {
+                const { data: v, error: vErr } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
+                if(!vErr) visitsData = v || [];
+            } catch(e) { console.warn("Visits table error or missing"); }
+            try {
+                const { data: c, error: cErr } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
+                if(!cErr) clicksData = c || [];
+            } catch(e) { console.warn("Clicks table error or missing"); }
+            const visitCount = visitsData.length;
+            const clickCount = clicksData.length;
             const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
-            
             document.getElementById('stat-visits').innerText = visitCount;
             document.getElementById('stat-clicks').innerText = clickCount;
             document.getElementById('stat-ctr').innerText = ctr + '%';
-
             const countryMap = {};
-            visits?.forEach(v => { if(v.country) countryMap[v.country] = (countryMap[v.country] || 0) + 1; });
+            visitsData.forEach(v => { if(v.country) countryMap[v.country] = (countryMap[v.country] || 0) + 1; });
             document.getElementById('stat-countries').innerText = Object.keys(countryMap).length;
-
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const visitData = [0,0,0,0,0,0,0];
-            visits?.forEach(v => {
+            const visitFreq = [0,0,0,0,0,0,0];
+            visitsData.forEach(v => {
                 const d = new Date(v.created_at).getDay();
-                visitData[d]++;
+                visitFreq[d]++;
             });
-
-            if (chartInstance) chartInstance.destroy();
-            const ctx = document.getElementById('visitsChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: 'Visits',
-                        data: visitData,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
-                }
-            });
-
+            const canvas = document.getElementById('visitsChart');
+            if (canvas) {
+                if (chartInstance) chartInstance.destroy();
+                const ctx = canvas.getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'Visits',
+                            data: visitFreq,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
             const mapEl = document.getElementById('map');
             mapEl.innerHTML = '';
             mapInstance = new maplibregl.Map({
@@ -425,13 +430,11 @@
                 center: [0, 20],
                 zoom: 1
             });
-
             const countryCoords = {
                 'US': [-95.7129, 37.0902], 'GB': [-3.4360, 55.3781], 'FR': [2.2137, 46.2276], 
                 'DE': [10.4515, 51.1657], 'IN': [78.9629, 20.5937], 'CA': [-106.3468, 56.1304],
                 'AU': [133.7751, -25.2744], 'BR': [-51.9253, -14.2350], 'JP': [138.2529, 36.2048]
             };
-
             Object.entries(countryMap).forEach(([code, count]) => {
                 const coords = countryCoords[code] || [0, 0];
                 if(coords[0] !== 0) {
@@ -455,13 +458,15 @@
             msgContainer.scrollTop = msgContainer.scrollHeight;
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                const response = await supabaseClient.functions.invoke('jasper-chat', {
-                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } },
-                    headers: { Authorization: `Bearer ${session?.access_token}` }
+                if (!session) throw new Error("No session");
+                const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
+                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } }
                 });
-                msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${response.data.reply}</div>`;
+                if (error) throw error;
+                msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
             } catch (err) {
-                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Try again.</div>`;
+                console.error("Jasper Error:", err);
+                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Make sure the Edge Function is deployed and shared.</div>`;
             }
             msgContainer.scrollTop = msgContainer.scrollHeight;
         });

@@ -24,7 +24,6 @@
         .animate-spin-slow { animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .sparkle-btn { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
-        .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { display: none; }
         .typing-dot { width: 4px; height: 4px; background: #94a3b8; border-radius: 50%; animation: blink 1.4s infinite both; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
@@ -32,6 +31,23 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
+    <div id="handle-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl text-center">
+            <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i data-feather="globe" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-3xl font-black mb-3 text-slate-900">Be Visible to the world</h3>
+            <p class="text-slate-500 mb-8 text-sm leading-relaxed">Add your profile handle to be visible to the world and start building your stack.</p>
+            <div class="relative mb-6">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">@</span>
+                <input type="text" id="setup-handle-input" placeholder="yourname" class="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition font-bold text-lg">
+            </div>
+            <button id="setup-handle-btn" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                Continue to Dashboard
+            </button>
+        </div>
+    </div>
+
     <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center relative">
             <button id="close-modal-btn" class="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition text-slate-400">
@@ -47,6 +63,7 @@
             </button>
         </div>
     </div>
+
     <nav class="fixed top-0 w-full z-40 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" id="logo-refresh">
             <i data-feather="layers"></i><span>LinkStack</span>
@@ -55,6 +72,7 @@
             <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
         </button>
     </nav>
+
     <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
         <section class="grid lg:grid-cols-12 gap-12">
             <div class="lg:col-span-7 space-y-8">
@@ -67,12 +85,15 @@
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
                     </button>
                 </div>
+
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
                     <button id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap transition">Links</button>
+                    <button id="tab-socials" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Socials</button>
                     <button id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Style</button>
                     <button id="tab-verification" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Verification</button>
                     <button id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Analytics</button>
                 </div>
+
                 <div id="section-links" class="space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-4">Add New Link</h3>
@@ -86,6 +107,65 @@
                     </div>
                     <div id="links-editor-list" class="space-y-3"></div>
                 </div>
+
+                <div id="section-socials" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-lg font-black mb-6">Social Links</h3>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="instagram" class="w-5 h-5"></i></div>
+                                <input type="text" id="social-instagram" placeholder="Instagram Username" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            </div>
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="youtube" class="w-5 h-5"></i></div>
+                                <input type="text" id="social-youtube" placeholder="YouTube Channel Handle" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            </div>
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="twitter" class="w-5 h-5"></i></div>
+                                <input type="text" id="social-twitter" placeholder="X (Twitter) Username" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            </div>
+
+                            <div id="pro-socials-container" class="space-y-4 hidden border-t border-slate-100 pt-6">
+                                <div class="relative">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="music" class="w-5 h-5"></i></div>
+                                    <input type="text" id="social-tiktok" placeholder="TikTok Username" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="linkedin" class="w-5 h-5"></i></div>
+                                    <input type="text" id="social-linkedin" placeholder="LinkedIn Profile Slug" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="tv" class="w-5 h-5"></i></div>
+                                    <input type="text" id="social-twitch" placeholder="Twitch Channel Name" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="hash" class="w-5 h-5"></i></div>
+                                    <input type="text" id="social-discord" placeholder="Discord Invite Code" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i data-feather="disc" class="w-5 h-5"></i></div>
+                                    <input type="text" id="social-spotify" placeholder="Spotify Artist/User URL" class="w-full pl-12 pr-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                            </div>
+
+                            <button id="save-socials-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mt-4 flex items-center justify-center gap-2 hover:bg-slate-800 transition">
+                                <i data-feather="check"></i> Save Socials
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="socials-upsell" class="bg-indigo-600 p-8 rounded-[2.5rem] text-white flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><i data-feather="zap"></i></div>
+                            <div>
+                                <h4 class="font-black">Unlock more socials</h4>
+                                <p class="text-white/70 text-xs">Twitch, Discord, TikTok & more</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('business')" class="px-6 py-3 bg-white text-indigo-600 rounded-xl text-xs font-black">Upgrade</button>
+                    </div>
+                </div>
+
                 <div id="section-style" class="hidden space-y-8">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-6">Identity</h3>
@@ -107,6 +187,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div id="section-verification" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-2xl font-black mb-2">Verification</h3>
@@ -129,6 +210,7 @@
                         <div id="verification-action-area" class="mt-8"></div>
                     </div>
                 </div>
+
                 <div id="section-business" class="hidden space-y-6">
                     <div id="business-paywall">
                         <div class="bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
@@ -157,6 +239,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="lg:col-span-5">
                 <div id="phone-preview" class="mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col">
                     <div class="flex-1 overflow-y-auto scrollbar-hide p-8 text-center flex flex-col items-center">
@@ -166,12 +249,16 @@
                         </div>
                         <h2 id="preview-name" class="font-black text-xl mb-1 tracking-tight"></h2>
                         <p id="preview-bio" class="text-[11px] opacity-80 px-4 mb-8"></p>
+                        
+                        <div id="preview-socials" class="flex flex-wrap justify-center gap-4 mb-8"></div>
+
                         <div id="preview-links" class="w-full space-y-3"></div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
     <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         <div id="jasper-chat-window" class="w-[350px] max-w-[calc(100vw-3rem)] h-[500px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
             <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-indigo-600 text-white">
@@ -239,7 +326,16 @@
 
         window.toggleJasper = () => { document.getElementById('jasper-chat-window').classList.toggle('open'); feather.replace(); };
         window.closeModal = () => { document.getElementById('modal-container').classList.add('hidden'); };
-        window.switchTab = (t) => { ['links','style','business','verification'].forEach(s => { document.getElementById('section-'+s).classList.add('hidden'); document.getElementById('tab-'+s).classList.remove('active-tab'); }); document.getElementById('section-'+t).classList.remove('hidden'); document.getElementById('tab-'+t).classList.add('active-tab'); };
+        window.switchTab = (t) => { 
+            ['links','socials','style','business','verification'].forEach(s => { 
+                document.getElementById('section-'+s)?.classList.add('hidden'); 
+                document.getElementById('tab-'+s)?.classList.remove('active-tab'); 
+                document.getElementById('tab-'+s)?.classList.add('text-slate-400');
+            }); 
+            document.getElementById('section-'+t)?.classList.remove('hidden'); 
+            document.getElementById('tab-'+t)?.classList.add('active-tab'); 
+            document.getElementById('tab-'+t)?.classList.remove('text-slate-400');
+        };
         window.deleteLink = async (id) => { await supabaseClient.from('links').delete().eq('id', id); loadAll(); };
         window.reorderLink = async (index, dir) => {
             const newIdx = index + dir;
@@ -266,6 +362,7 @@
             document.getElementById('dismiss-modal-btn').onclick = window.closeModal;
             document.getElementById('copy-link-btn').onclick = () => { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copied!", "copy"); };
             document.getElementById('tab-links').onclick = () => switchTab('links');
+            document.getElementById('tab-socials').onclick = () => switchTab('socials');
             document.getElementById('tab-style').onclick = () => switchTab('style');
             document.getElementById('tab-verification').onclick = () => switchTab('verification');
             document.getElementById('tab-business').onclick = () => switchTab('business');
@@ -277,6 +374,22 @@
                 document.getElementById('link-label').value = '';
                 document.getElementById('link-url').value = '';
                 loadAll();
+            };
+            document.getElementById('save-socials-btn').onclick = async () => {
+                if(!currentUser) return;
+                const socials = {
+                    instagram: document.getElementById('social-instagram').value.trim(),
+                    youtube: document.getElementById('social-youtube').value.trim(),
+                    twitter: document.getElementById('social-twitter').value.trim(),
+                    tiktok: document.getElementById('social-tiktok').value.trim(),
+                    linkedin: document.getElementById('social-linkedin').value.trim(),
+                    twitch: document.getElementById('social-twitch').value.trim(),
+                    discord: document.getElementById('social-discord').value.trim(),
+                    spotify: document.getElementById('social-spotify').value.trim()
+                };
+                await supabaseClient.from('profiles').update({ socials_data: socials }).eq('id', currentUser.id);
+                loadAll();
+                showModal("Saved", "Social channels updated!", "check-circle");
             };
             document.getElementById('save-profile-btn').onclick = async () => {
                 if (!currentUser) return;
@@ -308,6 +421,14 @@
             document.getElementById('close-jasper-btn').onclick = window.toggleJasper;
             document.getElementById('toggle-jasper-btn').onclick = window.toggleJasper;
             document.getElementById('jasper-form').onsubmit = handleJasperSubmit;
+            document.getElementById('setup-handle-btn').onclick = async () => {
+                const handle = document.getElementById('setup-handle-input').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (handle.length < 3) return showModal("Wait", "Handle must be at least 3 characters.", "alert-circle");
+                const { error } = await supabaseClient.from('profiles').update({ handle }).eq('id', currentUser.id);
+                if (error) return showModal("Error", "Handle might be taken. Try another.", "x-circle");
+                document.getElementById('handle-modal').classList.add('hidden');
+                loadAll();
+            };
         }
 
         async function handleJasperSubmit(e) {
@@ -315,30 +436,21 @@
             const input = document.getElementById('jasper-input');
             const query = input.value.trim();
             if (!query) return;
-
             const msgContainer = document.getElementById('jasper-messages');
             const typingIndicator = document.getElementById('jasper-typing-indicator');
-
             msgContainer.innerHTML += `<div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">${query}</div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
-
             typingIndicator.classList.remove('hidden');
             msgContainer.scrollTop = msgContainer.scrollHeight;
-
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) throw new Error("No session");
-
                 const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
-                    body: { 
-                        message: query, 
-                        context: { profile: cachedProfile, links: cachedLinks } 
-                    }
+                    headers: { Authorization: `Bearer ${session.access_token}` },
+                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } }
                 });
-
                 if (error) throw error;
-
                 typingIndicator.classList.add('hidden');
                 msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
             } catch (err) {
@@ -372,8 +484,12 @@
             if (!currentUser) return;
             let { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
             if (!p) {
-                const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]).select().single();
+                const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, theme_id: 'default' }]).select().single();
                 p = newP;
+            }
+            if (!p.handle) {
+                document.getElementById('handle-modal').classList.remove('hidden');
+                feather.replace();
             }
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', currentUser.id).order('order_index', { ascending: true });
             cachedProfile = p;
@@ -385,10 +501,14 @@
             if (p.is_business) {
                 document.getElementById('business-content').classList.remove('hidden');
                 document.getElementById('business-paywall').classList.add('hidden');
+                document.getElementById('pro-socials-container').classList.remove('hidden');
+                document.getElementById('socials-upsell').classList.add('hidden');
                 setTimeout(loadAnalytics, 100);
             } else {
                 document.getElementById('business-paywall').classList.remove('hidden');
                 document.getElementById('business-content').classList.add('hidden');
+                document.getElementById('pro-socials-container').classList.add('hidden');
+                document.getElementById('socials-upsell').classList.remove('hidden');
             }
             feather.replace();
         }
@@ -400,6 +520,17 @@
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
             document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
+            
+            const sd = p.socials_data || {};
+            document.getElementById('social-instagram').value = sd.instagram || '';
+            document.getElementById('social-youtube').value = sd.youtube || '';
+            document.getElementById('social-twitter').value = sd.twitter || '';
+            document.getElementById('social-tiktok').value = sd.tiktok || '';
+            document.getElementById('social-linkedin').value = sd.linkedin || '';
+            document.getElementById('social-twitch').value = sd.twitch || '';
+            document.getElementById('social-discord').value = sd.discord || '';
+            document.getElementById('social-spotify').value = sd.spotify || '';
+
             document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
                 <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -453,9 +584,30 @@
             document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
+            
+            const sd = p.socials_data || {};
+            const socialIcons = [
+                { id: 'instagram', icon: 'instagram' },
+                { id: 'youtube', icon: 'youtube' },
+                { id: 'twitter', icon: 'twitter' },
+                { id: 'tiktok', icon: 'music' },
+                { id: 'linkedin', icon: 'linkedin' },
+                { id: 'twitch', icon: 'tv' },
+                { id: 'discord', icon: 'hash' },
+                { id: 'spotify', icon: 'disc' }
+            ];
+            
+            const activeSocials = socialIcons.filter(s => sd[s.id]);
+            document.getElementById('preview-socials').innerHTML = activeSocials.map(s => `
+                <div class="w-8 h-8 rounded-full flex items-center justify-center border ${theme.btn} opacity-80 hover:opacity-100 transition-opacity">
+                    <i data-feather="${s.icon}" class="w-4 h-4"></i>
+                </div>
+            `).join('');
+
             document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-3 rounded-xl border font-bold text-sm ${theme.btn}">${l.label}</div>`).join('');
             const badge = document.getElementById('verification-badge-container');
             badge.innerHTML = p.is_verified ? (p.handle === 'james' ? goldBadge : standardBadge) : '';
+            feather.replace();
         }
 
         async function loadAnalytics() {
@@ -513,23 +665,25 @@
                 });
             }
             const mapEl = document.getElementById('map');
-            mapEl.innerHTML = '';
-            mapInstance = new maplibregl.Map({
-                container: 'map',
-                style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
-                center: [0, 20],
-                zoom: 1
-            });
-            const countryCoords = { 'US': [-95.7, 37.1], 'GB': [-3.4, 55.4], 'FR': [2.2, 46.2], 'DE': [10.5, 51.2], 'IN': [79.0, 20.6], 'CA': [-106.3, 56.1], 'AU': [133.8, -25.3], 'BR': [-51.9, -14.2], 'JP': [138.3, 36.2] };
-            Object.entries(countryMap).forEach(([code, count]) => {
-                const coords = countryCoords[code] || [0, 0];
-                if(coords[0] !== 0) {
-                    const el = document.createElement('div');
-                    el.className = 'w-6 h-6 bg-indigo-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[8px] text-white font-bold';
-                    el.innerText = count;
-                    new maplibregl.Marker(el).setLngLat(coords).addTo(mapInstance);
-                }
-            });
+            if (mapEl) {
+                mapEl.innerHTML = '';
+                mapInstance = new maplibregl.Map({
+                    container: 'map',
+                    style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
+                    center: [0, 20],
+                    zoom: 1
+                });
+                const countryCoords = { 'US': [-95.7, 37.1], 'GB': [-3.4, 55.4], 'FR': [2.2, 46.2], 'DE': [10.5, 51.2], 'IN': [79.0, 20.6], 'CA': [-106.3, 56.1], 'AU': [133.8, -25.3], 'BR': [-51.9, -14.2], 'JP': [138.3, 36.2] };
+                Object.entries(countryMap).forEach(([code, count]) => {
+                    const coords = countryCoords[code] || [0, 0];
+                    if(coords[0] !== 0) {
+                        const el = document.createElement('div');
+                        el.className = 'w-6 h-6 bg-indigo-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[8px] text-white font-bold';
+                        el.innerText = count;
+                        new maplibregl.Marker(el).setLngLat(coords).addTo(mapInstance);
+                    }
+                });
+            }
         }
 
         function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-'+id).classList.add('active'); updatePreview(); }

@@ -24,9 +24,30 @@
         .animate-spin-slow { animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .sparkle-btn { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        .typing-dot { width: 4px; height: 4px; background: #94a3b8; border-radius: 50%; animation: blink 1.4s infinite both; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
+    <div id="tos-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl text-center">
+            <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i data-feather="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-2xl font-black mb-2 text-slate-900">Removal of Verified Badge</h3>
+            <p class="text-slate-600 mb-6 text-sm leading-relaxed">You've violated our terms of service. This is just a warning; if you violate our terms again, your account will be deleted permanently.</p>
+            <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer group">
+                <input type="checkbox" id="tos-agree" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition">I agree</span>
+            </label>
+            <button id="tos-acknowledge-btn" disabled class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl opacity-50 cursor-not-allowed transition-all">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
     <div id="handle-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 modal-bg">
         <div class="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl text-center">
             <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
@@ -260,31 +281,43 @@
             <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-indigo-600 text-white">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                        <i data-feather="zap" class="w-4 h-4 text-white"></i>
+                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L14.8 8.2L21 11L14.8 13.8L12 20L9.2 13.8L3 11L9.2 8.2L12 2Z" fill="currentColor"/>
+                        </svg>
                     </div>
-                    <span class="font-black text-sm tracking-tight">Jasper AI</span>
+                    <span class="font-black text-sm tracking-tight">Chat with Jasper</span>
                 </div>
                 <button id="close-jasper-btn" class="p-2 hover:bg-white/10 rounded-full transition"><i data-feather="x" class="w-4 h-4"></i></button>
             </div>
-            <div id="jasper-messages" class="flex-1 p-8 flex flex-col items-center justify-center text-center">
-                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-6">
-                    <i data-feather="clock" class="w-8 h-8"></i>
+            <div id="jasper-messages" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
+                <div class="w-full h-full flex flex-col items-center justify-center text-center py-12" id="jasper-loading">
+                    <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300"><i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i></div>
+                    <p class="text-slate-900 font-bold mb-1">Jasper is waking up</p>
+                    <p class="text-slate-400 text-xs px-8">Analyzing your profile data...</p>
                 </div>
-                <h4 class="text-xl font-black text-slate-900 mb-2">Coming Soon</h4>
-                <p class="text-slate-500 text-sm px-6">We're training Jasper to help you optimize your profile performance. Stay tuned!</p>
+            </div>
+            <div id="jasper-typing-indicator" class="hidden px-6 py-2">
+                <div class="bg-slate-50 w-fit px-4 py-3 rounded-2xl flex items-center gap-1.5">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
             </div>
             <div class="p-6 border-t border-slate-50">
-                <div class="relative mb-3">
-                    <input type="text" disabled placeholder="Jasper is currently offline..." class="w-full pl-4 pr-12 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm outline-none cursor-not-allowed opacity-60">
-                    <button disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300"><i data-feather="send" class="w-4 h-4"></i></button>
-                </div>
+                <form id="jasper-form" class="relative mb-3">
+                    <input type="text" id="jasper-input" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" id="jasper-send" disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition-colors"><i data-feather="send" class="w-4 h-4"></i></button>
+                </form>
                 <div class="flex items-center justify-center gap-1.5 opacity-40">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Feature in Development</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Powered by Gemini 2.5 Flash</span>
                 </div>
             </div>
         </div>
         <button id="toggle-jasper-btn" class="w-16 h-16 sparkle-btn text-white rounded-2xl shadow-xl hover:opacity-90 transition flex items-center justify-center hover:scale-105 active:scale-95">
-            <i data-feather="zap" class="w-8 h-8"></i>
+            <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 2L13.8 8.2L20 11L13.8 13.8L11 20L8.2 13.8L2 11L8.2 8.2L11 2Z" fill="white"/>
+                <path d="M19 14L20 16.5L22.5 17.5L20 18.5L19 21L18 18.5L15.5 17.5L18 16.5L19 14Z" fill="white" opacity="0.65"/>
+            </svg>
         </button>
     </div>
 
@@ -335,6 +368,7 @@
             if (!session) return window.location.replace('/');
             currentUser = session.user;
             await loadAll();
+            initJasper();
             setupEventListeners();
         }
 
@@ -399,10 +433,12 @@
             document.getElementById('downgrade-btn').onclick = async () => {
                 if(!confirm("Are you sure? Verification and analytics will be disabled.")) return;
                 await supabaseClient.from('profiles').update({ is_business: false, is_verified: false }).eq('id', currentUser.id);
+                showModal("You've lost your verified badge!", "To be verified on LinkStack, you must meet all criteria including being a Business Pro. Since you switched back to personal, you've lost one of the requirements.", "shield-off");
                 loadAll();
             };
             document.getElementById('close-jasper-btn').onclick = window.toggleJasper;
             document.getElementById('toggle-jasper-btn').onclick = window.toggleJasper;
+            document.getElementById('jasper-form').onsubmit = handleJasperSubmit;
             document.getElementById('setup-handle-btn').onclick = async () => {
                 const handle = document.getElementById('setup-handle-input').value.toLowerCase().replace(/[^a-z0-9]/g, '');
                 if (handle.length < 3) return showModal("Wait", "Handle must be at least 3 characters.", "alert-circle");
@@ -411,6 +447,55 @@
                 document.getElementById('handle-modal').classList.add('hidden');
                 loadAll();
             };
+        }
+
+        async function handleJasperSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('jasper-input');
+            const query = input.value.trim();
+            if (!query) return;
+            const msgContainer = document.getElementById('jasper-messages');
+            const typingIndicator = document.getElementById('jasper-typing-indicator');
+            msgContainer.innerHTML += `<div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">${query}</div>`;
+            input.value = '';
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+            typingIndicator.classList.remove('hidden');
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) throw new Error("No session");
+                const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
+                    headers: { Authorization: `Bearer ${session.access_token}` },
+                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } }
+                });
+                if (error) throw error;
+                typingIndicator.classList.add('hidden');
+                msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
+            } catch (err) {
+                console.error("Jasper Error:", err);
+                typingIndicator.classList.add('hidden');
+                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Make sure you are signed in.</div>`;
+            }
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        function initJasper() {
+            const jasperInput = document.getElementById('jasper-input');
+            const jasperSend = document.getElementById('jasper-send');
+            const jasperLoading = document.getElementById('jasper-loading');
+            const jasperMessages = document.getElementById('jasper-messages');
+            if (jasperInput && jasperSend) {
+                jasperInput.disabled = false;
+                jasperInput.classList.remove('opacity-50', 'bg-slate-50');
+                jasperInput.classList.add('bg-white');
+                jasperSend.disabled = false;
+                jasperSend.classList.remove('text-slate-300');
+                jasperSend.classList.add('text-indigo-600');
+                if (jasperLoading) jasperLoading.remove();
+                if (!jasperMessages.querySelector('.jasper-welcome')) {
+                    jasperMessages.innerHTML = `<div class="jasper-welcome self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">Hey there! I'm Jasper. I can analyze your LinkStack profile. Ask me anything!</div>`;
+                }
+            }
         }
 
         async function loadAll() {
@@ -493,6 +578,20 @@
             updateItem('check-avatar', checks.avatar);
             updateItem('check-links', checks.links);
             const allMet = Object.values(checks).every(v => v === true);
+            
+            if (allMet && p.is_verified === false) {
+                const tosModal = document.getElementById('tos-modal');
+                tosModal.classList.remove('hidden');
+                const checkbox = document.getElementById('tos-agree');
+                const ackBtn = document.getElementById('tos-acknowledge-btn');
+                checkbox.onchange = (e) => {
+                    ackBtn.disabled = !e.target.checked;
+                    ackBtn.className = e.target.checked ? "w-full py-4 bg-slate-900 text-white font-bold rounded-2xl opacity-100 cursor-pointer transition-all" : "w-full py-4 bg-slate-900 text-white font-bold rounded-2xl opacity-50 cursor-not-allowed transition-all";
+                };
+                ackBtn.onclick = () => tosModal.classList.add('hidden');
+                feather.replace();
+            }
+
             const actionArea = document.getElementById('verification-action-area');
             if (p.is_verified) actionArea.innerHTML = `<div class="p-6 bg-indigo-50 rounded-3xl text-center font-black text-indigo-600 border border-indigo-100">Verified Member</div>`;
             else if (allMet) {

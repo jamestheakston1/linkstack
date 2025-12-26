@@ -13,6 +13,40 @@
         .link-card:hover { transform: scale(1.02); }
         .social-btn { transition: transform 0.2s, opacity 0.2s; }
         .social-btn:hover { transform: translateY(-2px); opacity: 1; }
+
+        .badge-tooltip { position: relative; display: inline-block; cursor: help; }
+        .badge-tooltip .tooltiptext {
+            visibility: hidden;
+            width: 140px;
+            background-color: #0f172a;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px;
+            position: absolute;
+            z-index: 50;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 10px;
+            font-family: sans-serif;
+            font-weight: bold;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+        .badge-tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+        .badge-tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-8">
@@ -91,7 +125,10 @@
             document.getElementById('avatar').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle}`;
             
             if (p.is_verified) {
-                document.getElementById('badge-container').innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
+                const badgeHtml = p.handle === 'james' ? 
+                    `<div class="badge-tooltip">${goldBadge}<span class="tooltiptext">Official account of LinkStack</span></div>` : 
+                    `<div class="badge-tooltip">${standardBadge}<span class="tooltiptext">Verified Business Account</span></div>`;
+                document.getElementById('badge-container').innerHTML = badgeHtml;
             }
 
             const sd = p.socials_data || {};

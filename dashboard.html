@@ -19,25 +19,16 @@
         .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
         .theme-card { cursor: pointer; transition: all 0.2s; border: 4px solid transparent; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 1.25rem; }
         .theme-card.active { border-color: #6366f1; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        #map { width: 100%; height: 240px; border-radius: 1.5rem; }
-
-        #jasper-chat-window {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(20px) scale(0.95);
-            opacity: 0;
-            pointer-events: none;
-        }
-        #jasper-chat-window.open {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #map { width: 100%; height: 280px; border-radius: 1.5rem; }
+        #jasper-chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; }
+        #jasper-chat-window.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
         .animate-spin-slow { animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .sparkle-btn { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
-
     <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center relative">
             <button onclick="closeModal()" class="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition text-slate-400">
@@ -53,7 +44,6 @@
             </button>
         </div>
     </div>
-
     <nav class="fixed top-0 w-full z-40 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.reload()">
             <i data-feather="layers"></i><span>LinkStack</span>
@@ -62,32 +52,29 @@
             <i data-feather="log-out" class="w-4 h-4"></i> Sign Out
         </button>
     </nav>
-
     <main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
         <section class="grid lg:grid-cols-12 gap-12">
             <div class="lg:col-span-7 space-y-8">
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
                     </button>
                 </div>
-
                 <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-hide gap-8">
                     <button onclick="switchTab('links')" id="tab-links" class="pb-4 font-bold active-tab whitespace-nowrap transition">Links</button>
                     <button onclick="switchTab('style')" id="tab-style" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Style</button>
                     <button onclick="switchTab('verification')" id="tab-verification" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Verification</button>
                     <button onclick="switchTab('business')" id="tab-business" class="pb-4 font-bold text-slate-400 whitespace-nowrap transition">Analytics</button>
                 </div>
-
                 <div id="section-links" class="space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-4">Add New Link</h3>
                         <div class="grid gap-3">
-                            <input type="text" id="link-label" placeholder="Link Label (e.g. My Portfolio)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <input type="text" id="link-label" placeholder="Link Label" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             <input type="url" id="link-url" placeholder="URL (https://...)" class="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             <button id="add-link-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black mt-2 flex items-center justify-center gap-2 hover:bg-slate-800 transition">
                                 <i data-feather="plus"></i> Add to Stack
@@ -96,7 +83,6 @@
                     </div>
                     <div id="links-editor-list" class="space-y-3"></div>
                 </div>
-
                 <div id="section-style" class="hidden space-y-8">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-lg font-black mb-6">Identity</h3>
@@ -118,7 +104,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="section-verification" class="hidden space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                         <h3 class="text-2xl font-black mb-2">Verification</h3>
@@ -126,7 +111,7 @@
                         <div class="space-y-3" id="verification-checklist">
                             <div id="check-pro" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                                 <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">Business Pro Status</span></div>
-                                <a href="/business" class="text-xs font-black text-indigo-600">Upgrade</a>
+                                <a href="javascript:void(0)" onclick="switchTab('business')" class="text-xs font-black text-indigo-600">Upgrade</a>
                             </div>
                             <div id="check-bio" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                                 <div class="flex items-center gap-3"><div class="status-icon"><i data-feather="circle"></i></div><span class="font-bold text-sm text-slate-700">Profile Bio</span></div>
@@ -141,14 +126,13 @@
                         <div id="verification-action-area" class="mt-8"></div>
                     </div>
                 </div>
-
                 <div id="section-business" class="hidden space-y-6">
-                    <div id="business-paywall" class="hidden">
+                    <div id="business-paywall">
                         <div class="bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
                             <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6"><i data-feather="bar-chart-2" class="w-10 h-10"></i></div>
                             <h3 class="text-3xl font-black mb-4">Unlock Business Pro</h3>
-                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights, visit tracking, and link performance.</p>
-                            <button onclick="window.location.href='/business'" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition">Get Started</button>
+                            <p class="text-slate-500 mb-8 max-w-sm mx-auto">Get deep insights, visit tracking, and link performance stats.</p>
+                            <button onclick="upgradeToBusiness()" class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition">Get Started for $0</button>
                         </div>
                     </div>
                     <div id="business-content" class="hidden space-y-6">
@@ -160,9 +144,8 @@
                                 <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CTR</p><p id="stat-ctr" class="text-2xl font-black">0%</p></div>
                                 <div class="p-4 bg-slate-50 rounded-2xl text-center"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Geo</p><p id="stat-countries" class="text-2xl font-black">0</p></div>
                             </div>
-                            <div class="h-64 mb-8"><canvas id="visitsChart"></canvas></div>
+                            <div class="h-64 mb-8 bg-slate-50 rounded-3xl p-4"><canvas id="visitsChart"></canvas></div>
                             <div id="map" class="mb-8"></div>
-                            
                             <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
                                 <p class="text-xs text-slate-400 font-bold">Business Pro Active</p>
                                 <button onclick="downgradeToPersonal()" class="text-xs font-bold text-red-500 hover:text-red-700 transition">Switch back to Personal</button>
@@ -171,7 +154,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="lg:col-span-5">
                 <div id="phone-preview" class="mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col">
                     <div class="flex-1 overflow-y-auto scrollbar-hide p-8 text-center flex flex-col items-center">
@@ -187,189 +169,123 @@
             </div>
         </section>
     </main>
-
     <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         <div id="jasper-chat-window" class="w-[350px] max-w-[calc(100vw-3rem)] h-[500px] bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
             <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-indigo-600 text-white">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                        <i data-feather="cpu" class="w-4 h-4 text-white"></i>
+                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L14.8 8.2L21 11L14.8 13.8L12 20L9.2 13.8L3 11L9.2 8.2L12 2Z" fill="currentColor"/>
+                        </svg>
                     </div>
                     <span class="font-black text-sm tracking-tight">Chat with Jasper</span>
                 </div>
-                <button onclick="toggleJasper()" class="p-2 hover:bg-white/10 rounded-full transition">
-                    <i data-feather="x" class="w-4 h-4"></i>
-                </button>
+                <button onclick="toggleJasper()" class="p-2 hover:bg-white/10 rounded-full transition"><i data-feather="x" class="w-4 h-4"></i></button>
             </div>
-            
             <div id="jasper-messages" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
                 <div class="w-full h-full flex flex-col items-center justify-center text-center py-12" id="jasper-loading">
-                    <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
-                        <i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300"><i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i></div>
                     <p class="text-slate-900 font-bold mb-1">Jasper is waking up</p>
-                    <p class="text-slate-400 text-xs px-8">Ready to analyze your LinkStack data...</p>
+                    <p class="text-slate-400 text-xs px-8">Analyzing your profile data...</p>
                 </div>
             </div>
-
             <div class="p-6 border-t border-slate-50">
                 <form id="jasper-form" class="relative mb-3">
                     <input type="text" id="jasper-input" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" id="jasper-send" disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition-colors">
-                        <i data-feather="send" class="w-4 h-4"></i>
-                    </button>
+                    <button type="submit" id="jasper-send" disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition-colors"><i data-feather="send" class="w-4 h-4"></i></button>
                 </form>
                 <div class="flex items-center justify-center gap-1.5 opacity-40">
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Powered by Gemini 2.5 Flash</span>
                 </div>
             </div>
         </div>
-
-        <button onclick="toggleJasper()" class="w-16 h-16 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition flex items-center justify-center hover:scale-105 active:scale-95">
-            <i data-feather="message-circle" class="w-8 h-8"></i>
+        <button onclick="toggleJasper()" class="w-16 h-16 sparkle-btn text-white rounded-2xl shadow-xl hover:opacity-90 transition flex items-center justify-center hover:scale-105 active:scale-95">
+            <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 2L13.8 8.2L20 11L13.8 13.8L11 20L8.2 13.8L2 11L8.2 8.2L11 2Z" fill="white"/>
+                <path d="M19 14L20 16.5L22.5 17.5L20 18.5L19 21L18 18.5L15.5 17.5L18 16.5L19 14Z" fill="white" opacity="0.65"/>
+            </svg>
         </button>
     </div>
-
     <script>
         const MAPTILER_KEY = 'iFCe8tlBYnpPH7TsEpUI';
         const SUPABASE_URL = 'https://xcicvuqdoztxhidwdmlc.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentUser = null, selectedTheme = 'default', visitChart = null, cachedProfile = null, cachedLinks = [];
-
+        let currentUser = null, selectedTheme = 'default', cachedProfile = null, cachedLinks = [], chartInstance = null, mapInstance = null;
         const goldBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#EFBF04"></path><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"></path></g></svg>`;
         const standardBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
-
         const themeConfig = {
             default: { bg: '#0f172a', btn: 'bg-white/10 text-white border-white/10', text: 'text-white' },
             sunset: { bg: 'linear-gradient(135deg, #fb923c, #db2777)', btn: 'bg-white text-orange-600 border-transparent', text: 'text-white' },
             glass: { bg: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe) center/cover', btn: 'bg-white/20 backdrop-blur-md text-white border-white/30', text: 'text-white' }
         };
-
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return window.location.replace('/');
             currentUser = session.user;
-            
             await loadAll();
             initJasper();
         }
-
         function initJasper() {
             const jasperInput = document.getElementById('jasper-input');
             const jasperSend = document.getElementById('jasper-send');
             const jasperLoading = document.getElementById('jasper-loading');
             const jasperMessages = document.getElementById('jasper-messages');
-
             if (jasperInput && jasperSend) {
                 jasperInput.disabled = false;
-                jasperInput.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
+                jasperInput.classList.remove('opacity-50', 'bg-slate-50');
                 jasperInput.classList.add('bg-white');
                 jasperSend.disabled = false;
                 jasperSend.classList.remove('text-slate-300');
                 jasperSend.classList.add('text-indigo-600');
-                
                 if (jasperLoading) jasperLoading.remove();
-                
-                jasperMessages.innerHTML = `
-                    <div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">
-                        Hey there! I'm Jasper. I have access to your LinkStack profile and analytics. Ask me anything!
-                    </div>
-                `;
+                if (!jasperMessages.querySelector('.jasper-welcome')) {
+                    jasperMessages.innerHTML = `<div class="jasper-welcome self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">Hey there! I'm Jasper. I can analyze your LinkStack profile. Ask me anything!</div>`;
+                }
             }
         }
-
         async function loadAll() {
+            if (!currentUser) return;
             let { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
             if (!p) {
                 const { data: newP } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, handle: currentUser.email.split('@')[0], theme_id: 'default' }]).select().single();
                 p = newP;
             }
-
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', currentUser.id).order('order_index', { ascending: true });
-            
             cachedProfile = p;
             cachedLinks = links || [];
             selectedTheme = p.theme_id || 'default';
-            
             updateForms();
             updatePreview();
             updateVerification();
-            
             if (p.is_business) {
                 document.getElementById('business-content').classList.remove('hidden');
                 document.getElementById('business-paywall').classList.add('hidden');
-                loadAnalytics();
+                setTimeout(loadAnalytics, 100);
             } else {
                 document.getElementById('business-paywall').classList.remove('hidden');
                 document.getElementById('business-content').classList.add('hidden');
             }
             feather.replace();
         }
-
-        document.getElementById('add-link-btn').addEventListener('click', async () => {
-            const label = document.getElementById('link-label').value.trim();
-            const url = document.getElementById('link-url').value.trim();
-            if(!label || !url) return showModal("Error", "Please fill in both fields", "alert-circle");
-
-            const { error } = await supabaseClient.from('links').insert([{ 
-                profile_id: currentUser.id, 
-                label, 
-                url, 
-                order_index: cachedLinks.length 
-            }]);
-
-            if(error) showModal("Error", error.message, "x-octagon");
-            else {
-                document.getElementById('link-label').value = '';
-                document.getElementById('link-url').value = '';
-                loadAll();
-            }
-        });
-
-        async function deleteLink(id) {
-            await supabaseClient.from('links').delete().eq('id', id);
+        async function upgradeToBusiness() {
+            if (!currentUser) return;
+            await supabaseClient.from('profiles').update({ is_business: true }).eq('id', currentUser.id);
             loadAll();
+            showModal("Success", "Welcome to Business Pro!", "check-circle");
         }
-
-        async function reorderLink(index, dir) {
-            const newIdx = index + dir;
-            if(newIdx < 0 || newIdx >= cachedLinks.length) return;
-            const a = cachedLinks[index], b = cachedLinks[newIdx];
-            await supabaseClient.from('links').update({ order_index: newIdx }).eq('id', a.id);
-            await supabaseClient.from('links').update({ order_index: index }).eq('id', b.id);
-            loadAll();
-        }
-
-        document.getElementById('save-profile-btn').addEventListener('click', async () => {
-            const updates = { 
-                handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), 
-                avatar_url: document.getElementById('profile-avatar-url').value, 
-                bio: document.getElementById('profile-bio').value, 
-                theme_id: selectedTheme 
-            };
-            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
-            if(error) showModal("Error", error.message, "x-octagon");
-            else {
-                loadAll();
-                showModal("Success", "Appearance updated!", "check");
-            }
-        });
-
         async function downgradeToPersonal() {
-            if(!confirm("Are you sure? You will lose verification and analytics.")) return;
+            if(!confirm("Are you sure? Verification and analytics will be disabled.")) return;
             await supabaseClient.from('profiles').update({ is_business: false, is_verified: false }).eq('id', currentUser.id);
             loadAll();
         }
-
         function updateForms() {
             const p = cachedProfile;
+            if(!p) return;
             document.getElementById('profile-handle').value = p.handle || '';
             document.getElementById('profile-avatar-url').value = p.avatar_url || '';
             document.getElementById('profile-bio').value = p.bio || '';
-            document.getElementById('public-url-display').innerText = `https://link-stack.pages.dev/?u=${p.handle || '...'}`;
-            
+            document.getElementById('public-url-display').innerText = `https://linkstack.com/?u=${p.handle || '...'}`;
             document.getElementById('links-editor-list').innerHTML = cachedLinks.map((l, index) => `
                 <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -384,9 +300,39 @@
             `).join('');
             feather.replace();
         }
-
+        document.getElementById('add-link-btn').addEventListener('click', async () => {
+            const label = document.getElementById('link-label').value.trim();
+            const url = document.getElementById('link-url').value.trim();
+            if(!label || !url || !currentUser) return;
+            await supabaseClient.from('links').insert([{ profile_id: currentUser.id, label, url, order_index: cachedLinks.length }]);
+            document.getElementById('link-label').value = '';
+            document.getElementById('link-url').value = '';
+            loadAll();
+        });
+        async function deleteLink(id) { await supabaseClient.from('links').delete().eq('id', id); loadAll(); }
+        async function reorderLink(index, dir) {
+            const newIdx = index + dir;
+            if(newIdx < 0 || newIdx >= cachedLinks.length) return;
+            const a = cachedLinks[index], b = cachedLinks[newIdx];
+            await supabaseClient.from('links').update({ order_index: newIdx }).eq('id', a.id);
+            await supabaseClient.from('links').update({ order_index: index }).eq('id', b.id);
+            loadAll();
+        }
+        document.getElementById('save-profile-btn').addEventListener('click', async () => {
+            if (!currentUser) return;
+            const updates = { 
+                handle: document.getElementById('profile-handle').value.toLowerCase().replace(/[^a-z0-9]/g, ''), 
+                avatar_url: document.getElementById('profile-avatar-url').value, 
+                bio: document.getElementById('profile-bio').value, 
+                theme_id: selectedTheme 
+            };
+            await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
+            loadAll();
+            showModal("Success", "Appearance updated!", "check");
+        });
         function updateVerification() {
             const p = cachedProfile;
+            if(!p) return;
             const checks = { pro: p.is_business, bio: !!p.bio && p.bio.length > 3, avatar: !!p.avatar_url, links: cachedLinks.length >= 2 };
             const updateItem = (id, met) => {
                 const el = document.getElementById(id);
@@ -397,117 +343,138 @@
             updateItem('check-bio', checks.bio);
             updateItem('check-avatar', checks.avatar);
             updateItem('check-links', checks.links);
-
             const allMet = Object.values(checks).every(v => v === true);
             const actionArea = document.getElementById('verification-action-area');
             if (p.is_verified) actionArea.innerHTML = `<div class="p-6 bg-indigo-50 rounded-3xl text-center font-black text-indigo-600 border border-indigo-100">Verified Member</div>`;
             else if (allMet) actionArea.innerHTML = `<button onclick="applyVerification()" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition">Claim Badge</button>`;
-            else actionArea.innerHTML = `<div class="p-6 bg-slate-100 rounded-3xl text-center text-slate-400 text-xs font-bold">Complete all tasks above to verify</div>`;
+            else actionArea.innerHTML = `<div class="p-6 bg-slate-100 rounded-3xl text-center text-slate-400 text-xs font-bold">Complete all tasks to verify</div>`;
             feather.replace();
         }
-
-        async function applyVerification() {
-            await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id);
-            loadAll();
-        }
-
+        async function applyVerification() { if(!currentUser) return; await supabaseClient.from('profiles').update({ is_verified: true }).eq('id', currentUser.id); loadAll(); }
         function updatePreview() {
             const p = cachedProfile;
+            if(!p) return;
             const theme = themeConfig[selectedTheme] || themeConfig.default;
             const preview = document.getElementById('phone-preview');
             preview.style.background = theme.bg;
             preview.style.backgroundSize = 'cover';
             preview.className = `mx-auto w-[320px] h-[640px] rounded-[3.5rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col ${theme.text}`;
-            
             document.getElementById('preview-name').innerText = `@${p.handle || 'username'}`;
             document.getElementById('preview-bio').innerText = p.bio || '';
             document.getElementById('preview-img').src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.handle || 'U'}`;
             document.getElementById('preview-links').innerHTML = cachedLinks.map(l => `<div class="p-3 rounded-xl border font-bold text-sm ${theme.btn}">${l.label}</div>`).join('');
-            
             const badge = document.getElementById('verification-badge-container');
             badge.innerHTML = p.is_verified ? (p.handle === 'james' ? goldBadge : standardBadge) : '';
         }
 
         async function loadAnalytics() {
+            if(!currentUser) return;
             const { data: visits } = await supabaseClient.from('visits').select('*').eq('profile_id', currentUser.id);
             const { data: clicks } = await supabaseClient.from('clicks').select('*').eq('profile_id', currentUser.id);
-            document.getElementById('stat-visits').innerText = visits?.length || 0;
-            document.getElementById('stat-clicks').innerText = clicks?.length || 0;
-            const mapEl = document.getElementById('map'); mapEl.innerHTML = '';
-            new maplibregl.Map({ container: 'map', style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`, center: [0, 20], zoom: 1 });
+            
+            const visitCount = visits?.length || 0;
+            const clickCount = clicks?.length || 0;
+            const ctr = visitCount > 0 ? ((clickCount / visitCount) * 100).toFixed(1) : 0;
+            
+            document.getElementById('stat-visits').innerText = visitCount;
+            document.getElementById('stat-clicks').innerText = clickCount;
+            document.getElementById('stat-ctr').innerText = ctr + '%';
+
+            const countryMap = {};
+            visits?.forEach(v => { if(v.country) countryMap[v.country] = (countryMap[v.country] || 0) + 1; });
+            document.getElementById('stat-countries').innerText = Object.keys(countryMap).length;
+
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const visitData = [0,0,0,0,0,0,0];
+            visits?.forEach(v => {
+                const d = new Date(v.created_at).getDay();
+                visitData[d]++;
+            });
+
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('visitsChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Visits',
+                        data: visitData,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                }
+            });
+
+            const mapEl = document.getElementById('map');
+            mapEl.innerHTML = '';
+            mapInstance = new maplibregl.Map({
+                container: 'map',
+                style: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`,
+                center: [0, 20],
+                zoom: 1
+            });
+
+            const countryCoords = {
+                'US': [-95.7129, 37.0902], 'GB': [-3.4360, 55.3781], 'FR': [2.2137, 46.2276], 
+                'DE': [10.4515, 51.1657], 'IN': [78.9629, 20.5937], 'CA': [-106.3468, 56.1304],
+                'AU': [133.7751, -25.2744], 'BR': [-51.9253, -14.2350], 'JP': [138.2529, 36.2048]
+            };
+
+            Object.entries(countryMap).forEach(([code, count]) => {
+                const coords = countryCoords[code] || [0, 0];
+                if(coords[0] !== 0) {
+                    const el = document.createElement('div');
+                    el.className = 'w-6 h-6 bg-indigo-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[8px] text-white font-bold';
+                    el.innerText = count;
+                    new maplibregl.Marker(el).setLngLat(coords).addTo(mapInstance);
+                }
+            });
         }
 
-        function toggleJasper() {
-            const chat = document.getElementById('jasper-chat-window');
-            chat.classList.toggle('open');
-            feather.replace();
-        }
-
+        function toggleJasper() { document.getElementById('jasper-chat-window').classList.toggle('open'); feather.replace(); }
         document.getElementById('jasper-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('jasper-input');
             const query = input.value.trim();
             if (!query) return;
-
             const msgContainer = document.getElementById('jasper-messages');
-            
-            msgContainer.innerHTML += `
-                <div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">
-                    ${query}
-                </div>
-            `;
+            msgContainer.innerHTML += `<div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">${query}</div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
-
             try {
-                const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
-                    body: { 
-                        message: query,
-                        context: {
-                            profile: cachedProfile,
-                            links: cachedLinks,
-                            analytics: {
-                                visits: parseInt(document.getElementById('stat-visits').innerText) || 0,
-                                clicks: parseInt(document.getElementById('stat-clicks').innerText) || 0
-                            }
-                        }
-                    }
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const response = await supabaseClient.functions.invoke('jasper-chat', {
+                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } },
+                    headers: { Authorization: `Bearer ${session?.access_token}` }
                 });
-
-                if (error) throw error;
-
-                msgContainer.innerHTML += `
-                    <div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">
-                        ${data.reply}
-                    </div>
-                `;
+                msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${response.data.reply}</div>`;
             } catch (err) {
-                msgContainer.innerHTML += `
-                    <div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">
-                        Sorry, I'm having trouble connecting to my brain right now.
-                    </div>
-                `;
+                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Try again.</div>`;
             }
             msgContainer.scrollTop = msgContainer.scrollHeight;
         });
-
         function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-'+id).classList.add('active'); updatePreview(); }
         function switchTab(t) { ['links','style','business','verification'].forEach(s => { document.getElementById('section-'+s).classList.add('hidden'); document.getElementById('tab-'+s).classList.remove('active-tab'); }); document.getElementById('section-'+t).classList.remove('hidden'); document.getElementById('tab-'+t).classList.add('active-tab'); }
-        function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copied to clipboard.", "copy"); }
+        function copyPublicLink() { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copied!", "copy"); }
         function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
         function showModal(t, m, i) { 
-            document.getElementById('modal-title').innerText = t; 
-            document.getElementById('modal-message').innerText = m; 
+            document.getElementById('modal-title').innerText = t; document.getElementById('modal-message').innerText = m; 
             document.getElementById('modal-feather-icon').setAttribute('data-feather', i); 
-            document.getElementById('modal-container').classList.remove('hidden'); 
-            feather.replace(); 
+            document.getElementById('modal-container').classList.remove('hidden'); feather.replace(); 
         }
-        
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            window.location.replace('/');
-        });
-
+        document.getElementById('logout-btn').addEventListener('click', async () => { if(!supabaseClient) return; await supabaseClient.auth.signOut(); window.location.replace('/'); });
         init();
     </script>
 </body>

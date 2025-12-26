@@ -25,6 +25,10 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .sparkle-btn { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
         .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { display: none; }
+        .typing-dot { width: 4px; height: 4px; background: #94a3b8; border-radius: 50%; animation: blink 1.4s infinite both; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -188,6 +192,13 @@
                     <p class="text-slate-400 text-xs px-8">Analyzing your profile data...</p>
                 </div>
             </div>
+            <div id="jasper-typing-indicator" class="hidden px-6 py-2">
+                <div class="bg-slate-50 w-fit px-4 py-3 rounded-2xl flex items-center gap-1.5">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
             <div class="p-6 border-t border-slate-50">
                 <form id="jasper-form" class="relative mb-3">
                     <input type="text" id="jasper-input" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-indigo-500">
@@ -304,22 +315,36 @@
             const input = document.getElementById('jasper-input');
             const query = input.value.trim();
             if (!query) return;
+
             const msgContainer = document.getElementById('jasper-messages');
+            const typingIndicator = document.getElementById('jasper-typing-indicator');
+
             msgContainer.innerHTML += `<div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">${query}</div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            typingIndicator.classList.remove('hidden');
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) throw new Error("No session");
+
                 const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
-                    body: { message: query, context: { profile: cachedProfile, links: cachedLinks } },
-                    headers: { Authorization: `Bearer ${session.access_token}` }
+                    body: { 
+                        message: query, 
+                        context: { profile: cachedProfile, links: cachedLinks } 
+                    }
                 });
+
                 if (error) throw error;
+
+                typingIndicator.classList.add('hidden');
                 msgContainer.innerHTML += `<div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">${data.reply}</div>`;
             } catch (err) {
                 console.error("Jasper Error:", err);
-                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper.</div>`;
+                typingIndicator.classList.add('hidden');
+                msgContainer.innerHTML += `<div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">Trouble connecting to Jasper. Make sure you are signed in.</div>`;
             }
             msgContainer.scrollTop = msgContainer.scrollHeight;
         }

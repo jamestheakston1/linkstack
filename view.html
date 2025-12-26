@@ -8,9 +8,11 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        body { transition: background 0.5s ease; }
-        .link-card { transition: transform 0.2s, background 0.2s; }
+        body { transition: background 0.5s ease, color 0.5s ease; }
+        .link-card { transition: transform 0.2s, background 0.2s, box-shadow 0.2s; }
         .link-card:hover { transform: scale(1.02); }
+        .social-btn { transition: transform 0.2s, opacity 0.2s; }
+        .social-btn:hover { transform: translateY(-2px); opacity: 1; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-8">
@@ -26,7 +28,9 @@
         </div>
         
         <h1 id="name" class="text-2xl font-black tracking-tight mb-2"></h1>
-        <p id="bio" class="text-sm opacity-80 mb-8 px-4"></p>
+        <p id="bio" class="text-sm opacity-80 mb-6 px-4"></p>
+
+        <div id="socials-container" class="flex flex-wrap justify-center gap-4 mb-8"></div>
 
         <div id="links-container" class="w-full space-y-4"></div>
 
@@ -46,9 +50,23 @@
         const standardBadge = `<svg width="24" height="24" viewBox="0 0 512 512"><g fill="none" fill-rule="evenodd"><path d="M256 472.153L176.892 512l-41.725-81.129-86.275-16.654 11.596-91.422L0 256l60.488-66.795-11.596-91.422 86.275-16.654L176.892 0 256 39.847 335.108 0l41.725 81.129 86.275 16.654-11.596 91.422L512 256l-60.488 66.795 11.596 91.422-86.275 16.654L335.108 512z" fill="#4285f4"/><path d="M211.824 284.5L171 243.678l-36 36 40.824 40.824-.063.062 36 36 .063-.062.062.062 36-36-.062-.062L376.324 192l-36-36z" fill="#fff"/></g></svg>`;
 
         const themeConfig = {
-            default: { body: 'bg-slate-900 text-white', card: 'bg-white/10 border-white/10 text-white' },
-            sunset: { body: 'bg-gradient-to-br from-orange-400 to-pink-600 text-white', card: 'bg-white text-orange-600 border-transparent' },
-            glass: { body: 'bg-[url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe)] bg-cover bg-center text-white', card: 'bg-white/20 backdrop-blur-md border-white/30 text-white' }
+            default: { body: 'bg-slate-900 text-white', card: 'bg-white/10 border-white/10 text-white', social: 'border-white/20' },
+            sunset: { body: 'bg-gradient-to-br from-orange-400 to-pink-600 text-white', card: 'bg-white text-orange-600 border-transparent shadow-lg', social: 'bg-white/20 border-white/30' },
+            glass: { body: 'bg-[url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe)] bg-cover bg-center text-white', card: 'bg-white/10 backdrop-blur-xl border-white/20 text-white', social: 'bg-white/10 border-white/20' },
+            neo: { body: 'bg-white text-slate-900', card: 'bg-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-slate-900', social: 'border-slate-900' },
+            cyber: { body: 'bg-black text-[#00ff41] font-mono', card: 'bg-black border border-[#00ff41] text-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.3)]', social: 'border-[#00ff41]' },
+            forest: { body: 'bg-[#1b2e1b] text-[#e8f5e9]', card: 'bg-[#2d4a2d] border-[#3e663e] text-[#e8f5e9]', social: 'bg-[#2d4a2d] border-[#3e663e]' }
+        };
+
+        const socialMap = {
+            instagram: { icon: 'instagram', url: (v) => `https://instagram.com/${v}` },
+            youtube: { icon: 'youtube', url: (v) => `https://youtube.com/@${v}` },
+            twitter: { icon: 'twitter', url: (v) => `https://x.com/${v}` },
+            tiktok: { icon: 'music', url: (v) => `https://tiktok.com/@${v}` },
+            linkedin: { icon: 'linkedin', url: (v) => `https://linkedin.com/in/${v}` },
+            twitch: { icon: 'tv', url: (v) => `https://twitch.tv/${v}` },
+            discord: { icon: 'hash', url: (v) => `https://discord.gg/${v}` },
+            spotify: { icon: 'disc', url: (v) => v.includes('http') ? v : `https://open.spotify.com/user/${v}` }
         };
 
         async function loadProfile() {
@@ -59,7 +77,7 @@
             const { data: profile } = await supabaseClient.from('profiles').select('*').eq('handle', handle.toLowerCase()).single();
             if (!profile) return window.location.href = '/';
 
-            const { data: links } = await supabaseClient.from('links').select('*').eq('user_id', profile.id).order('order_index', { ascending: true });
+            const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', profile.id).order('order_index', { ascending: true });
 
             renderProfile(profile, links || []);
             logVisit(profile.id);
@@ -75,6 +93,19 @@
             if (p.is_verified) {
                 document.getElementById('badge-container').innerHTML = p.handle === 'james' ? goldBadge : standardBadge;
             }
+
+            const sd = p.socials_data || {};
+            const socialsHtml = Object.entries(sd)
+                .filter(([key, val]) => val && socialMap[key])
+                .map(([key, val]) => {
+                    const cfg = socialMap[key];
+                    return `
+                        <a href="${cfg.url(val)}" target="_blank" class="w-10 h-10 rounded-full flex items-center justify-center border social-btn ${theme.social} opacity-80">
+                            <i data-feather="${cfg.icon}" class="w-5 h-5"></i>
+                        </a>
+                    `;
+                }).join('');
+            document.getElementById('socials-container').innerHTML = socialsHtml;
 
             document.getElementById('links-container').innerHTML = links.map(l => `
                 <button onclick="handleLinkClick('${p.id}', '${l.id}', '${l.url}')" class="w-full p-4 rounded-2xl font-black text-sm border link-card ${theme.card}">

@@ -32,6 +32,8 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .animate-spin-slow { animation: spin 3s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
@@ -67,7 +69,7 @@
                 <div class="bg-indigo-600 p-6 rounded-[2rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                     <div class="truncate">
                         <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Your Profile URL</p>
-                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://link-stack.pages.dev/?u=...</p>
+                        <p id="public-url-display" class="font-mono text-sm font-bold truncate">https://linkstack.com/?u=...</p>
                     </div>
                     <button onclick="copyPublicLink()" class="whitespace-nowrap px-6 py-3 bg-white text-indigo-600 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-indigo-50 transition">
                         <i data-feather="copy" class="w-4 h-4"></i> Copy Link
@@ -200,21 +202,23 @@
                 </button>
             </div>
             
-            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
-                <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
-                    <i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i>
+            <div id="jasper-messages" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
+                <div class="w-full h-full flex flex-col items-center justify-center text-center py-12" id="jasper-loading">
+                    <div class="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
+                        <i data-feather="loader" class="w-8 h-8 animate-spin-slow"></i>
+                    </div>
+                    <p class="text-slate-900 font-bold mb-1">Jasper is waking up</p>
+                    <p class="text-slate-400 text-xs px-8">Ready to analyze your LinkStack data...</p>
                 </div>
-                <p class="text-slate-900 font-bold mb-1">Jasper is being prepared</p>
-                <p class="text-slate-400 text-xs px-8">Jasper is not yet available to chat. Please check back later!</p>
             </div>
 
             <div class="p-6 border-t border-slate-50">
-                <div class="relative mb-3">
-                    <input type="text" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none opacity-50 cursor-not-allowed">
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300">
+                <form id="jasper-form" class="relative mb-3">
+                    <input type="text" id="jasper-input" disabled placeholder="Type your message..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" id="jasper-send" disabled class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition-colors">
                         <i data-feather="send" class="w-4 h-4"></i>
-                    </div>
-                </div>
+                    </button>
+                </form>
                 <div class="flex items-center justify-center gap-1.5 opacity-40">
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Powered by Gemini 2.5 Flash</span>
                 </div>
@@ -247,7 +251,33 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return window.location.replace('/');
             currentUser = session.user;
+            
             await loadAll();
+            initJasper();
+        }
+
+        function initJasper() {
+            const jasperInput = document.getElementById('jasper-input');
+            const jasperSend = document.getElementById('jasper-send');
+            const jasperLoading = document.getElementById('jasper-loading');
+            const jasperMessages = document.getElementById('jasper-messages');
+
+            if (jasperInput && jasperSend) {
+                jasperInput.disabled = false;
+                jasperInput.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
+                jasperInput.classList.add('bg-white');
+                jasperSend.disabled = false;
+                jasperSend.classList.remove('text-slate-300');
+                jasperSend.classList.add('text-indigo-600');
+                
+                if (jasperLoading) jasperLoading.remove();
+                
+                jasperMessages.innerHTML = `
+                    <div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">
+                        Hey there! I'm Jasper. I have access to your LinkStack profile and analytics. Ask me anything!
+                    </div>
+                `;
+            }
         }
 
         async function loadAll() {
@@ -412,6 +442,54 @@
             chat.classList.toggle('open');
             feather.replace();
         }
+
+        document.getElementById('jasper-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('jasper-input');
+            const query = input.value.trim();
+            if (!query) return;
+
+            const msgContainer = document.getElementById('jasper-messages');
+            
+            msgContainer.innerHTML += `
+                <div class="self-end bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%] shadow-sm ml-auto">
+                    ${query}
+                </div>
+            `;
+            input.value = '';
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('jasper-chat', {
+                    body: { 
+                        message: query,
+                        context: {
+                            profile: cachedProfile,
+                            links: cachedLinks,
+                            analytics: {
+                                visits: parseInt(document.getElementById('stat-visits').innerText) || 0,
+                                clicks: parseInt(document.getElementById('stat-clicks').innerText) || 0
+                            }
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                msgContainer.innerHTML += `
+                    <div class="self-start bg-slate-100 text-slate-800 p-3 rounded-2xl text-xs max-w-[80%] shadow-sm">
+                        ${data.reply}
+                    </div>
+                `;
+            } catch (err) {
+                msgContainer.innerHTML += `
+                    <div class="self-start bg-red-50 text-red-600 p-3 rounded-2xl text-xs max-w-[80%] border border-red-100 italic">
+                        Sorry, I'm having trouble connecting to my brain right now.
+                    </div>
+                `;
+            }
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        });
 
         function setTheme(id) { selectedTheme = id; document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active')); document.getElementById('theme-'+id).classList.add('active'); updatePreview(); }
         function switchTab(t) { ['links','style','business','verification'].forEach(s => { document.getElementById('section-'+s).classList.add('hidden'); document.getElementById('tab-'+s).classList.remove('active-tab'); }); document.getElementById('section-'+t).classList.remove('hidden'); document.getElementById('tab-'+t).classList.add('active-tab'); }

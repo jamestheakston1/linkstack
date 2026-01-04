@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkStack</title>
+    
+    <meta name="description" id="meta-description" content="Check out this profile on LinkStack.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" id="og-title" content="LinkStack Profile">
+    <meta property="og:description" id="og-description" content="Everything you are in one simple link.">
+    <meta property="og:image" id="og-image" content="">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitter-title" content="LinkStack Profile">
+    <meta name="twitter:description" id="twitter-description" content="Everything you are in one simple link.">
+    <meta name="twitter:image" id="twitter-image" content="">
+
+    <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 17 22 12'/></svg>">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/feather-icons"></script>
@@ -112,6 +126,23 @@
             if (!profile) return window.location.href = '/';
 
             const { data: links } = await supabaseClient.from('links').select('*').eq('profile_id', profile.id).order('order_index', { ascending: true });
+
+            const pageTitle = `${profile.handle} on LinkStack`;
+            const pageDesc = profile.bio || `View ${profile.handle}'s profile on LinkStack.`;
+            const avatarUrl = profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.handle}&background=6366f1&color=fff`;
+
+            document.title = pageTitle;
+            document.getElementById('meta-description').content = pageDesc;
+            document.getElementById('og-title').content = pageTitle;
+            document.getElementById('og-description').content = pageDesc;
+            document.getElementById('og-image').content = avatarUrl;
+            document.getElementById('twitter-title').content = pageTitle;
+            document.getElementById('twitter-description').content = pageDesc;
+            document.getElementById('twitter-image').content = avatarUrl;
+
+            const favicon = document.getElementById('dynamic-favicon');
+            favicon.href = avatarUrl;
+            favicon.type = "image/x-icon";
 
             renderProfile(profile, links || []);
             logVisit(profile.id);

@@ -15,23 +15,73 @@ serve(async (req) => {
   )
 
   const url = new URL(req.url)
-  const handle = url.searchParams.get('handle')?.toLowerCase()
+  const path = url.pathname.split('/').pop()
+  let handle = url.searchParams.get('handle')?.toLowerCase()
+
+  if (handle && handle.startsWith('@')) {
+    handle = handle.substring(1);
+  }
 
   if (!handle) {
     return new Response(JSON.stringify({ error: 'Handle required' }), { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      status: 400, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     })
   }
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*, links(*)')
-    .eq('handle', handle)
-    .single()
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('handle', handle)
+      .single()
 
-  return new Response(JSON.stringify(data || { error: 'Not found' }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    status: data ? 200 : 404
-  })
+    if (profileError || !profile) {
+      return new Response(JSON.stringify({ error: 'Not found' }), { 
+        status: 404, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      })
+    }
+
+    let result;
+
+    switch (path) {
+      case 'verified':
+        result = { is_verified: profile.is_verified };
+        break;
+      case 'theme':
+        result = { theme_id: profile.theme_id || 'default' };
+        break;
+      case 'profilepicture':
+        result = { avatar_url: profile.avatar_url };
+        break;
+      case 'socials':
+        result = profile.socials || {};
+        break;
+      case 'links':
+        const { data: links } = await supabase
+          .from('links')
+          .select('*')
+          .eq('profile_id', profile.id);
+        result = links || [];
+        break;
+      default:
+        const { data: fullLinks } = await supabase
+          .from('links')
+          .select('*')
+          .eq('profile_id', profile.id);
+        result = { ...profile, links: fullLinks || [] };
+    }
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
+    })
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'Internal Server Error', details: err.message }), { 
+      status: 500, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    })
+  }
 })

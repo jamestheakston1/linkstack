@@ -382,7 +382,7 @@
             document.getElementById('logo-refresh').onclick = () => location.reload();
             document.getElementById('close-modal-btn').onclick = window.closeModal;
             document.getElementById('dismiss-modal-btn').onclick = window.closeModal;
-            document.getElementById('copy-link-btn').onclick = () => { navigator.clipboard.writeText(document.getElementById('public-url-display').innerText); showModal("Copied", "Public URL copi[...]";
+            document.getElementById('copy-link-btn').onclick = () => {navigator.clipboard.writeText(document.getElementById('public-url-display').innerText);showModal("Copied", "Public URL copied!", "check-circle");};
             document.getElementById('tab-links').onclick = () => switchTab('links');
             document.getElementById('tab-socials').onclick = () => switchTab('socials');
             document.getElementById('tab-style').onclick = () => switchTab('style');

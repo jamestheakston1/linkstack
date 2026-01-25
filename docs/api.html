@@ -3,159 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation | LinkStack</title>
+    <title>Developer Hub | LinkStack API</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        code { font-family: 'ui-monospace', monospace; color: #6366f1; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
-        .endpoint-card { transition: all 0.3s ease; }
-        .endpoint-card:hover { border-color: #6366f1; transform: translateY(-2px); }
-        .modal-bg { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
-        .hidden { display: none !important; }
-        pre { tab-size: 2; border-radius: 1rem; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #10b981; margin-right: 4px; box-shadow: 0 0 8px #10b981; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); }
+        .code-window { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px -12px rgba(0,0,0,0.5); }
+        .endpoint-row { border-bottom: 1px solid #f1f5f9; padding-bottom: 4rem; margin-bottom: 4rem; }
+        .copy-pill { opacity: 0; transition: all 0.2s; }
+        .code-window:hover .copy-pill { opacity: 1; }
+        
+        .method-badge { background: #6366f1; color: white; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+<body class="bg-white text-slate-900 antialiased">
 
-    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
-        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
-            <i data-feather="layers"></i><span>LinkStack</span>
+    <nav class="fixed top-0 w-full z-50 glass-nav border-b border-slate-100 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-extrabold text-xl tracking-tight text-indigo-600 cursor-pointer" onclick="location.href='/'">
+            <i data-feather="terminal" class="w-6 h-6"></i><span>LinkStack<span class="text-slate-400">.api</span></span>
         </div>
         <div class="flex items-center gap-6">
-            <span class="text-xs font-bold text-slate-400 flex items-center"><span class="status-dot"></span> API LIVE</span>
-            <a href="/" class="text-sm font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1">
-                <i data-feather="arrow-left" class="w-4 h-4"></i> Back
-            </a>
+            <div id="api-status" class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <span class="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></span> Checking System
+            </div>
+            <a href="/" class="text-xs font-bold px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-full transition">Exit Docs</a>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto pt-32 px-6 pb-24">
-        <header class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-xs font-black uppercase tracking-widest inline-block">
-                        <i data-feather="github" class="inline w-3 h-3 mr-1"></i> GitHub Integrated
-                    </span>
-                    <span class="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest inline-block">v1.0.0</span>
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row pt-32 px-6 lg:px-12 gap-16">
+        
+        <aside class="lg:w-1/2">
+            <header class="mb-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-6">
+                    <i data-feather="github" class="w-3 h-3"></i> Public SDK v1.0
                 </div>
-                <h1 class="text-5xl font-black tracking-tighter mb-4">LinkStack Open API</h1>
-                <p class="text-slate-500 text-lg font-medium">No keys required. Connect your apps to the LinkStack ecosystem instantly.</p>
+                <h1 class="text-6xl font-extrabold tracking-tightest mb-6">Open <br><span class="text-indigo-600">Endpoints</span></h1>
+                <p class="text-slate-500 text-xl leading-relaxed max-w-md font-medium">
+                    Clean, keyless JSON access to every LinkStack profile. Integrate handles into your own apps with zero friction.
+                </p>
+            </header>
+
+            <div class="space-y-12">
+                <div class="endpoint-row" onmouseenter="updateCode('full')">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="method-badge">GET</span>
+                        <code class="text-sm">/public-api?handle={id}</code>
+                    </div>
+                    <h2 class="text-2xl font-extrabold mb-4">The Whole Stack</h2>
+                    <p class="text-slate-500 mb-6 font-medium">Retrieves the complete profile including bio, avatar, theme, socials, and all links.</p>
+                </div>
+
+                <div class="endpoint-row" onmouseenter="updateCode('links')">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="method-badge">GET</span>
+                        <code class="text-sm">/public-api/links?handle={id}</code>
+                    </div>
+                    <h2 class="text-2xl font-extrabold mb-4">Just the Links</h2>
+                    <p class="text-slate-500 mb-6 font-medium">Returns an array of link objects. Ideal for custom navigation components.</p>
+                </div>
+
+                <div class="endpoint-row" onmouseenter="updateCode('socials')">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="method-badge">GET</span>
+                        <code class="text-sm">/public-api/socials?handle={id}</code>
+                    </div>
+                    <h2 class="text-2xl font-extrabold mb-4">Social Handles</h2>
+                    <p class="text-slate-500 mb-6 font-medium">Fetches the social media object (YouTube, Twitter, WhatsApp, etc).</p>
+                </div>
+
+                <div class="endpoint-row" onmouseenter="updateCode('meta')">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="method-badge">GET</span>
+                        <code class="text-sm">/public-api/[type]?handle={id}</code>
+                    </div>
+                    <h2 class="text-2xl font-extrabold mb-4">Metadata Fragments</h2>
+                    <p class="text-slate-500 mb-6 font-medium">Use sub-paths like <code class="text-xs">/verified</code>, <code class="text-xs">/theme</code>, or <code class="text-xs">/profilepicture</code> for single-value responses.</p>
+                </div>
             </div>
-            <button onclick="openDemoModal()" class="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-indigo-100 hover:scale-105 transition flex items-center gap-2">
-                <i data-feather="play"></i> Live Demo
-            </button>
-        </header>
+        </aside>
 
-        <section class="space-y-12">
-            <h2 class="text-2xl font-black mb-8 flex items-center gap-2">
-                <i data-feather="code" class="text-indigo-600"></i> Primary Endpoints
-            </h2>
-
-            <div class="endpoint-card p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-black rounded-lg uppercase">GET</span>
-                    <span class="font-bold text-slate-400 text-sm">/public-api?handle={username}</span>
+        <aside class="lg:w-1/2 lg:sticky lg:top-32 self-start">
+            <div class="code-window rounded-3xl overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/5">
+                    <div class="flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500/20"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500/20"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500/20"></div>
+                    </div>
+                    <div id="code-label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Full Profile Request</div>
                 </div>
-                <h3 class="text-xl font-black mb-2">Full Profile Data</h3>
-                <p class="text-slate-500 text-sm mb-6">Returns display name, bio, verified status, links array, and social handles.</p>
                 
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-2">JavaScript Example</h4>
-                        <pre class="bg-slate-900 text-indigo-300 p-4 text-xs overflow-x-auto">fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=james')
-  .then(res => res.json())
-  .then(data => console.log(data));</pre>
+                <div class="p-8 space-y-8">
+                    <div class="relative group">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold text-indigo-400">javascript</span>
+                            <button onclick="copyCurrentCode()" class="copy-pill bg-white/10 hover:bg-white/20 text-white text-[10px] px-3 py-1 rounded-lg font-bold">Copy URL</button>
+                        </div>
+                        <pre id="display-code" class="text-indigo-100 text-sm overflow-x-auto whitespace-pre-wrap">fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=chocoluxe')</pre>
                     </div>
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-2">Response Preview</h4>
-                        <pre class="bg-slate-50 text-slate-600 p-4 text-xs border">{ "handle": "james", "display_name": "James", "links": [...] }</pre>
+
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold text-emerald-400">expected_response.json</span>
+                        </div>
+                        <pre id="display-response" class="text-slate-400 text-xs overflow-x-auto">
+{
+  "handle": "chocoluxe",
+  "is_verified": true,
+  "links": [...]
+}</pre>
                     </div>
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="endpoint-card p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-md uppercase">GET</span>
-                        <code class="text-xs">/links</code>
-                    </div>
-                    <h3 class="text-lg font-black mb-4">Links Array</h3>
-                    <pre class="bg-slate-900 text-indigo-300 p-4 text-[10px] mb-4 overflow-x-auto">fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/links?handle=james')</pre>
-                    <pre class="bg-slate-50 text-slate-600 p-4 text-[10px] border">[ { "label": "GitHub", "url": "..." } ]</pre>
-                </div>
-
-                <div class="endpoint-card p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-md uppercase">GET</span>
-                        <code class="text-xs">/socials</code>
-                    </div>
-                    <h3 class="text-lg font-black mb-4">Social Objects</h3>
-                    <pre class="bg-slate-900 text-indigo-300 p-4 text-[10px] mb-4 overflow-x-auto">fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/socials?handle=james')</pre>
-                    <pre class="bg-slate-50 text-slate-600 p-4 text-[10px] border">{ "github": "jamestheakston1" }</pre>
-                </div>
+            <div class="mt-8 p-8 bg-slate-50 rounded-3xl border border-slate-100">
+                <h4 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <i data-feather="zap" class="w-4 h-4 text-amber-500"></i> CORS Enabled
+                </h4>
+                <p class="text-slate-500 text-sm leading-relaxed font-medium">
+                    This API is configured with permissive headers. You can call it directly from client-side JavaScript without encountering CORS blocks.
+                </p>
             </div>
-
-            <h2 class="text-2xl font-black pt-12 mb-8 flex items-center gap-2">
-                <i data-feather="layers" class="text-indigo-600"></i> Metadata Endpoints
-            </h2>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="p-6 bg-white border-2 border-slate-100 rounded-[2rem] shadow-sm">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase">/verified</span>
-                    <pre class="bg-slate-900 text-indigo-300 p-3 text-[9px] my-3">fetch('.../verified?handle=james')</pre>
-                    <pre class="bg-slate-50 text-slate-600 p-3 text-[9px] border">{ "is_verified": true }</pre>
-                </div>
-
-                <div class="p-6 bg-white border-2 border-slate-100 rounded-[2rem] shadow-sm">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase">/theme</span>
-                    <pre class="bg-slate-900 text-indigo-300 p-3 text-[9px] my-3">fetch('.../theme?handle=james')</pre>
-                    <pre class="bg-slate-50 text-slate-600 p-3 text-[9px] border">{ "theme_id": "glass" }</pre>
-                </div>
-
-                <div class="p-6 bg-white border-2 border-slate-100 rounded-[2rem] shadow-sm">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase">/profilepicture</span>
-                    <pre class="bg-slate-900 text-indigo-300 p-3 text-[9px] my-3">fetch('.../profilepicture?handle=j')</pre>
-                    <pre class="bg-slate-50 text-slate-600 p-3 text-[9px] border">{ "avatar_url": "..." }</pre>
-                </div>
-            </div>
-        </section>
-
-        <footer class="mt-20 pt-12 border-t border-slate-200 text-center">
-            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">© James Theakston 2026</p>
-        </footer>
-    </main>
-
-    <div id="demo-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-bg">
-        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-xl shadow-2xl relative">
-            <button onclick="closeDemoModal()" class="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition text-slate-400"><i data-feather="x"></i></button>
-            <h3 class="text-2xl font-black mb-6">Live API Explorer</h3>
-            <div class="flex gap-2 mb-8">
-                <input type="text" id="demoHandle" value="james" class="flex-1 px-5 py-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-indigo-500/20 font-bold" placeholder="Username...">
-                <button onclick="runDemo()" class="px-6 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition">Run</button>
-            </div>
-            <div id="demoOutput" class="hidden">
-                <pre id="jsonPreview" class="bg-slate-50 p-6 rounded-2xl text-[11px] text-slate-700 border border-slate-100 overflow-y-auto max-h-64 font-mono"></pre>
-            </div>
-        </div>
+        </aside>
     </div>
+
+    <footer class="mt-32 py-12 border-t border-slate-100 text-center">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">© 2026 LinkStack Cloud Infrastructure</p>
+    </footer>
 
     <script>
         feather.replace();
-        function openDemoModal() { document.getElementById('demo-modal').classList.remove('hidden'); }
-        function closeDemoModal() { document.getElementById('demo-modal').classList.add('hidden'); }
-        async function runDemo() {
-            const h = document.getElementById('demoHandle').value;
-            const p = document.getElementById('jsonPreview');
-            document.getElementById('demoOutput').classList.remove('hidden');
-            p.innerText = "// Connecting to LinkStack Cloud...";
-            try {
-                const res = await fetch(`https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=${h}`);
-                const data = await res.json();
-                p.innerText = JSON.stringify(data, null, 2);
-            } catch (err) { p.innerText = "// Error: Profile not found or network issue."; }
+
+        const codeSnippets = {
+            full: {
+                label: "Full Profile Request",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=chocoluxe",
+                res: '{\n  "handle": "chocoluxe",\n  "is_verified": true,\n  "bio": "Art and taste...",\n  "links": [...]\n}'
+            },
+            links: {
+                label: "Links Only Request",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/links?handle=chocoluxe",
+                res: '[\n  { "label": "Website", "url": "..." },\n  { "label": "YouTube", "url": "..." }\n]'
+            },
+            socials: {
+                label: "Socials Request",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/socials?handle=chocoluxe",
+                res: '{\n  "youtube": "chocoluxe",\n  "whatsapp": "..."\n}'
+            },
+            meta: {
+                label: "Metadata Request",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/verified?handle=chocoluxe",
+                res: '{\n  "is_verified": true\n}'
+            }
+        };
+
+        function updateCode(key) {
+            const data = codeSnippets[key];
+            document.getElementById('code-label').innerText = data.label;
+            document.getElementById('display-code').innerText = `fetch('${data.url}')\n  .then(res => res.json())\n  .then(data => console.log(data));`;
+            document.getElementById('display-response').innerText = data.res;
         }
+
+        async function checkStatus() {
+            const statusEl = document.getElementById('api-status');
+            try {
+                const start = Date.now();
+                await fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=chocoluxe');
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> API Online (${Date.now() - start}ms)`;
+                statusEl.classList.replace('text-slate-400', 'text-emerald-600');
+            } catch (e) {
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> API Offline`;
+            }
+        }
+
+        function copyCurrentCode() {
+            const code = document.getElementById('display-code').innerText;
+            navigator.clipboard.writeText(code);
+            const btn = event.target;
+            btn.innerText = "Copied!";
+            setTimeout(() => btn.innerText = "Copy URL", 2000);
+        }
+
+        checkStatus();
     </script>
 </body>
 </html>

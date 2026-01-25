@@ -23,6 +23,17 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .btn-send {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-send:active { transform: scale(0.95); }
+
+        @keyframes pulse-indigo {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .loading-text { animation: pulse-indigo 1.5s infinite; }
     </style>
 </head>
 <body class="bg-white text-slate-900 antialiased">
@@ -60,6 +71,9 @@
                     </div>
                     <h2 class="text-2xl font-extrabold mb-4">The Whole Stack</h2>
                     <p class="text-slate-500 mb-6 font-medium">Retrieves the complete profile including bio, avatar, theme, socials, and all links.</p>
+                    <button onclick="sendRequest('full')" class="btn-send flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200">
+                        <i data-feather="play" class="w-3 h-3"></i> Send Request
+                    </button>
                 </div>
 
                 <div class="endpoint-row" onmouseenter="updateCode('links')">
@@ -69,6 +83,9 @@
                     </div>
                     <h2 class="text-2xl font-extrabold mb-4">Just the Links</h2>
                     <p class="text-slate-500 mb-6 font-medium">Returns an array of link objects. Ideal for custom navigation components.</p>
+                    <button onclick="sendRequest('links')" class="btn-send flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200">
+                        <i data-feather="play" class="w-3 h-3"></i> Send Request
+                    </button>
                 </div>
 
                 <div class="endpoint-row" onmouseenter="updateCode('socials')">
@@ -78,15 +95,30 @@
                     </div>
                     <h2 class="text-2xl font-extrabold mb-4">Social Handles</h2>
                     <p class="text-slate-500 mb-6 font-medium">Fetches the social media object (YouTube, Twitter, WhatsApp, etc).</p>
+                    <button onclick="sendRequest('socials')" class="btn-send flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200">
+                        <i data-feather="play" class="w-3 h-3"></i> Send Request
+                    </button>
                 </div>
 
-                <div class="endpoint-row" onmouseenter="updateCode('meta')">
+                <div class="endpoint-row" onmouseenter="updateCode('verified')">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="method-badge">GET</span>
                         <code class="text-sm">/public-api/[type]?handle={id}</code>
                     </div>
                     <h2 class="text-2xl font-extrabold mb-4">Metadata Fragments</h2>
-                    <p class="text-slate-500 mb-6 font-medium">Use sub-paths like <code class="text-xs">/verified</code>, <code class="text-xs">/theme</code>, or <code class="text-xs">/profilepicture</code> for single-value responses.</p>
+                    <p class="text-slate-500 mb-6 font-medium">Fetch single-value responses for specific profile attributes.</p>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="sendRequest('verified')" class="btn-send flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-black text-white text-[10px] font-bold rounded-lg transition-all">
+                            <i data-feather="check-circle" class="w-3 h-3 text-indigo-400"></i> Get Verified Status
+                        </button>
+                        <button onclick="sendRequest('theme')" class="btn-send flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-black text-white text-[10px] font-bold rounded-lg transition-all">
+                            <i data-feather="palette" class="w-3 h-3 text-indigo-400"></i> Get Theme
+                        </button>
+                        <button onclick="sendRequest('profilepicture')" class="btn-send flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-black text-white text-[10px] font-bold rounded-lg transition-all">
+                            <i data-feather="image" class="w-3 h-3 text-indigo-400"></i> Get Avatar
+                        </button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -105,15 +137,15 @@
                 <div class="p-8 space-y-8">
                     <div class="relative group">
                         <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs font-bold text-indigo-400">javascript</span>
-                            <button onclick="copyCurrentCode()" class="copy-pill bg-white/10 hover:bg-white/20 text-white text-[10px] px-3 py-1 rounded-lg font-bold">Copy URL</button>
+                            <span class="text-xs font-bold text-indigo-400 font-mono">javascript</span>
+                            <button onclick="copyCurrentCode(event)" class="copy-pill bg-white/10 hover:bg-white/20 text-white text-[10px] px-3 py-1 rounded-lg font-bold">Copy URL</button>
                         </div>
                         <pre id="display-code" class="text-indigo-100 text-sm overflow-x-auto whitespace-pre-wrap">fetch('https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api?handle=chocoluxe')</pre>
                     </div>
 
                     <div class="relative">
                         <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs font-bold text-emerald-400">expected_response.json</span>
+                            <span id="response-label" class="text-xs font-bold text-emerald-400 font-mono italic">expected_response.json</span>
                         </div>
                         <pre id="display-response" class="text-slate-400 text-xs overflow-x-auto">
 {
@@ -127,17 +159,17 @@
 
             <div class="mt-8 p-8 bg-slate-50 rounded-3xl border border-slate-100">
                 <h4 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
-                    <i data-feather="info" class="w-4 h-4 text-amber-500"></i> Beta API
+                    <i data-feather="zap" class="w-4 h-4 text-amber-500"></i> CORS Enabled
                 </h4>
                 <p class="text-slate-500 text-sm leading-relaxed font-medium">
-                    This API is currently in beta and may not work properly. To report issues, go to the issues page in the jamestheakston1/linkstack GitHub repo, or visit the contact page at https://linkstack.pages.dev/contact
+                    This API is configured with permissive headers. You can call it directly from client-side JavaScript without encountering CORS blocks.
                 </p>
             </div>
         </aside>
     </div>
 
     <footer class="mt-32 py-12 border-t border-slate-100 text-center">
-        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">© 2026 James Theakston/LinkStack</p>
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">© 2026 LinkStack Cloud Infrastructure</p>
     </footer>
 
     <script>
@@ -159,18 +191,62 @@
                 url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/socials?handle=chocoluxe",
                 res: '{\n  "youtube": "chocoluxe",\n  "whatsapp": "..."\n}'
             },
-            meta: {
-                label: "Metadata Request",
+            verified: {
+                label: "Verification Metadata",
                 url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/verified?handle=chocoluxe",
                 res: '{\n  "is_verified": true\n}'
+            },
+            theme: {
+                label: "Theme Metadata",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/theme?handle=chocoluxe",
+                res: '{\n  "theme": "dark"\n}'
+            },
+            profilepicture: {
+                label: "Avatar Metadata",
+                url: "https://xcicvuqdoztxhidwdmlc.supabase.co/functions/v1/public-api/profilepicture?handle=chocoluxe",
+                res: '{\n  "url": "https://..."\n}'
             }
         };
 
         function updateCode(key) {
             const data = codeSnippets[key];
+            if (!data) return;
+            
             document.getElementById('code-label').innerText = data.label;
             document.getElementById('display-code').innerText = `fetch('${data.url}')\n  .then(res => res.json())\n  .then(data => console.log(data));`;
-            document.getElementById('display-response').innerText = data.res;
+            
+            const resLabel = document.getElementById('response-label');
+            if (!resLabel.classList.contains('text-indigo-400')) {
+                document.getElementById('display-response').innerText = data.res;
+                resLabel.innerText = "expected_response.json";
+                resLabel.className = "text-xs font-bold text-emerald-400 font-mono italic";
+            }
+        }
+
+        async function sendRequest(key) {
+            const data = codeSnippets[key];
+            const resDisplay = document.getElementById('display-response');
+            const resLabel = document.getElementById('response-label');
+            
+            updateCode(key);
+            resDisplay.innerText = "// Fetching live data...";
+            resDisplay.classList.add('loading-text');
+            resLabel.innerText = "fetching...";
+
+            try {
+                const response = await fetch(data.url);
+                const result = await response.json();
+                
+                resDisplay.innerText = JSON.stringify(result, null, 2);
+                resLabel.innerText = "live_response.json";
+                resLabel.className = "text-xs font-bold text-indigo-400 font-mono uppercase tracking-widest";
+            } catch (error) {
+                resDisplay.innerText = `// Error: ${error.message}`;
+                resLabel.innerText = "error.log";
+                resLabel.className = "text-xs font-bold text-red-400 font-mono";
+            } finally {
+                resDisplay.classList.remove('loading-text');
+            }
         }
 
         async function checkStatus() {
@@ -185,7 +261,7 @@
             }
         }
 
-        function copyCurrentCode() {
+        function copyCurrentCode(event) {
             const code = document.getElementById('display-code').innerText;
             navigator.clipboard.writeText(code);
             const btn = event.target;

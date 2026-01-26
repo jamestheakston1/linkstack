@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account | LinkStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .modal-overlay { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; }
+        .modal-overlay.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/dashboard'">
+            <i data-feather="layers"></i><span>LinkStack</span>
+        </div>
+        <button onclick="switchAccount()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition">
+            <i data-feather="users" class="w-4 h-4"></i> Switch Account
+        </button>
+    </nav>
+
+    <main class="max-w-xl mx-auto pt-32 px-6 pb-24 text-center">
+        <div class="p-10 bg-white rounded-[2.5rem] border-2 border-slate-100 shadow-xl shadow-slate-200/50">
+            
+            <div class="relative inline-block mb-6">
+                <div class="w-24 h-24 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-slate-100 mx-auto">
+                    <img id="user-avatar" src="" class="w-full h-full object-cover hidden" alt="Profile">
+                    <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center text-slate-300">
+                        <i data-feather="user" class="w-10 h-10"></i>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-black tracking-tighter mb-1 text-slate-900">Manage Account</h1>
+            <p id="user-handle-display" class="text-indigo-600 font-bold mb-10">@loading...</p>
+
+            <div class="space-y-4">
+                <button onclick="openWarningModal()" class="w-full py-4 bg-red-50 text-red-600 font-black rounded-2xl border-2 border-red-100 hover:bg-red-100 transition flex items-center justify-center gap-2">
+                    <i data-feather="trash-2" class="w-4 h-4"></i> Delete Account
+                </button>
+                <button onclick="switchAccount()" class="w-full py-4 text-slate-600 font-black rounded-2xl border-2 border-slate-100 hover:bg-slate-100 transition flex items-center justify-center gap-2">
+                    <i data-feather="refresh-cw" class="w-4 h-4"></i> Switch Account
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="warning-modal" class="modal-overlay fixed inset-0 z-[100] items-center justify-center p-6">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl border border-slate-100">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-6">
+                <i data-feather="alert-octagon"></i>
+            </div>
+            
+            <h2 class="text-2xl font-black tracking-tight mb-4">Are you absolutely sure?</h2>
+            
+            <ul class="text-left space-y-3 mb-8">
+                <li class="flex items-start gap-3 text-sm font-medium text-slate-600">
+                    <i data-feather="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                    <span>Your handle will be released immediately for others to claim.</span>
+                </li>
+                <li class="flex items-start gap-3 text-sm font-medium text-slate-600">
+                    <i data-feather="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                    <span>All your links, bio, and analytics will be permanently erased.</span>
+                </li>
+                <li class="flex items-start gap-3 text-sm font-medium text-slate-600">
+                    <i data-feather="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                    <span>Your public API endpoint will return a 404 error.</span>
+                </li>
+            </ul>
+
+            <div class="flex flex-col gap-3">
+                <button id="modal-continue" onclick="confirmFinalDeletion()" disabled class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-lg opacity-50 cursor-not-allowed transition">
+                    Understand & Continue (5s)
+                </button>
+                <button onclick="closeWarningModal()" class="w-full py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition">
+                    I've changed my mind
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+
+        const SB_URL = 'https://xcicvuqdoztxhidwdmlc.supabase.co';
+        const SB_KEY = 'YOUR_ANON_KEY';
+        const supabase = createClient(SB_URL, SB_KEY);
+        
+        let currentHandle = '';
+
+        async function initPage() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return window.location.href = '/login';
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('handle, avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                currentHandle = profile.handle;
+                document.getElementById('user-handle-display').innerText = `@${profile.handle}`;
+                if (profile.avatar_url) {
+                    const img = document.getElementById('user-avatar');
+                    img.src = profile.avatar_url;
+                    img.classList.remove('hidden');
+                    document.getElementById('avatar-placeholder').classList.add('hidden');
+                }
+            }
+        }
+
+        window.openWarningModal = function() {
+            const modal = document.getElementById('warning-modal');
+            const btn = document.getElementById('modal-continue');
+            modal.classList.add('active');
+            
+            let timeLeft = 5;
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                btn.innerText = `Understand & Continue (${timeLeft}s)`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    btn.innerText = "Understand & Continue";
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }, 1000);
+        }
+
+        window.closeWarningModal = function() {
+            document.getElementById('warning-modal').classList.remove('active');
+        }
+
+        window.confirmFinalDeletion = async function() {
+            const btn = document.getElementById('modal-continue');
+            btn.innerHTML = '<i data-feather="loader" class="w-4 h-4 animate-spin mr-2"></i>Deleting...';
+            feather.replace();
+            
+            const { error } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('handle', currentHandle);
+
+            if (error) {
+                alert('Error: ' + error.message);
+                closeWarningModal();
+            } else {
+                window.location.href = '/deleted.html';
+            }
+        }
+
+        window.switchAccount = async function() {
+            await supabase.auth.signOut();
+            window.location.href = '/login.html';
+        };
+
+        initPage();
+        feather.replace();
+    </script>
+</body>
+</html>

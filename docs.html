@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation | LinkStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .doc-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .doc-card:hover { transform: translateY(-8px); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/'">
+            <i data-feather="layers"></i><span>LinkStack<span class="text-slate-400">.docs</span></span>
+        </div>
+        <a href="/dashboard" class="text-sm font-bold text-slate-500 hover:text-slate-800 transition">Dashboard</a>
+    </nav>
+
+    <main class="max-w-5xl mx-auto pt-40 px-6 pb-24">
+        <header class="text-center mb-20">
+            <h1 class="text-5xl font-black tracking-tightest mb-4">Developer Hub</h1>
+            <p class="text-slate-500 text-lg font-medium max-w-xl mx-auto">Everything you need to build, verify, and integrate with the LinkStack ecosystem.</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <a href="/docs/verification" class="doc-card group p-10 bg-white rounded-[3rem] border-2 border-slate-100 shadow-xl shadow-slate-200/40 block">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition">
+                    <i data-feather="check-circle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-3xl font-black tracking-tighter mb-4">Verification</h2>
+                <p class="text-slate-500 font-medium leading-relaxed mb-8">Learn how to verify your identity and get the blue checkmark on your public profile.</p>
+                <div class="flex items-center gap-2 text-blue-600 font-black text-sm uppercase tracking-widest">
+                    View Guide <i data-feather="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </a>
+
+            <a href="/docs/api.html" class="doc-card group p-10 bg-white rounded-[3rem] border-2 border-slate-100 shadow-xl shadow-slate-200/40 block">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition">
+                    <i data-feather="terminal" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-3xl font-black tracking-tighter mb-4">API Reference</h2>
+                <p class="text-slate-500 font-medium leading-relaxed mb-8">Access your profile data programmatically via our REST API and live endpoints.</p>
+                <div class="flex items-center gap-2 text-indigo-600 font-black text-sm uppercase tracking-widest">
+                    Documentation <i data-feather="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </a>
+        </div>
+
+        <footer class="mt-32 text-center">
+            <div class="inline-flex items-center gap-4 p-2 bg-white rounded-2xl border border-slate-100 pr-6">
+                <a href="https://github.com/jamestheakston1/" target="_blank" class="block group">
+                    <img src="https://avatars.githubusercontent.com/u/237596756?v=4" 
+                         alt="James" 
+                         class="w-10 h-10 rounded-full border-2 border-indigo-100 group-hover:border-indigo-500 transition-all">
+                </a>
+                <div class="text-left">
+                    <p id="last-updated" class="text-xs font-bold text-slate-400">Calculating last update...</p>
+                    <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Core Maintainer</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        function updateTimestamp() {
+            const lastUpdatedDate = new Date("2026-01-26T16:23:00");
+            const now = new Date();
+            const diffInMs = now - lastUpdatedDate;
+            
+            const diffInMins = Math.floor(diffInMs / (1000 * 60));
+            const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+            const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+            let timeString = "";
+            if (diffInDays > 0) {
+                timeString = `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+            } else if (diffInHours > 0) {
+                timeString = `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            } else if (diffInMins > 0) {
+                timeString = `${diffInMins} minute${diffInMins > 1 ? 's' : ''} ago`;
+            } else {
+                timeString = "Just now";
+            }
+
+            document.getElementById('last-updated').innerText = `Updated ${timeString}`;
+        }
+
+        feather.replace();
+        updateTimestamp();
+        setInterval(updateTimestamp, 60000);
+    </script>
+</body>
+</html>

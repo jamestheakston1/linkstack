@@ -16,11 +16,17 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .modal-overlay { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); }
         .pfp-ring { padding: 2px; background: linear-gradient(to bottom right, #4f46e5, #ec4899); }
+        .api-banner { background: linear-gradient(90deg, #4f46e5, #7c3aed); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
 
-    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+    <div onclick="location.href='/blog/vaultapi.html'" class="api-banner w-full py-3 px-4 text-white text-center cursor-pointer hover:opacity-90 transition-all sticky top-0 z-[60] flex items-center justify-center gap-2 group">
+        <span class="text-xs font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">Beta</span>
+        <p class="text-sm font-bold">LinkStack Vault API is arriving soon. <span class="underline decoration-white/30 group-hover:decoration-white transition">Build custom recovery workflows →</span></p>
+    </div>
+
+    <nav class="fixed top-11 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-8 flex justify-between items-center">
         <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/dashboard'">
             <i data-feather="layers"></i><span>LinkStack<span class="text-slate-400">.vault</span></span>
         </div>
@@ -47,27 +53,27 @@
         </div>
     </nav>
 
-    <main id="main-content" class="max-w-4xl mx-auto pt-40 px-6 pb-24 opacity-0 transition-opacity duration-500">
+    <main id="main-content" class="max-w-4xl mx-auto pt-52 px-6 pb-24 opacity-0 transition-opacity duration-500">
         <header class="mb-12 text-center">
             <h1 class="text-4xl font-black tracking-tight mb-2">Encrypted Vault</h1>
-            <p class="text-slate-500 font-medium text-lg">Secure your digital identity with industrial-grade encryption.</p>
+            <p class="text-slate-500 font-medium text-lg">Industrial-grade backups for your digital identity.</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div onclick="selectMode('export')" id="card-export" class="action-card p-10 bg-white rounded-[3rem] shadow-xl shadow-slate-200/40">
                 <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-8"><i data-feather="lock"></i></div>
                 <h3 class="font-black text-2xl mb-2">Protected Export</h3>
-                <p class="text-slate-400 font-medium">Bundle and encrypt your stack.</p>
+                <p class="text-slate-400 font-medium">Encrypt your stack with AES-GCM.</p>
             </div>
             <div onclick="selectMode('restore')" id="card-restore" class="action-card p-10 bg-white rounded-[3rem] shadow-xl shadow-slate-200/40">
                 <div class="w-14 h-14 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center mb-8"><i data-feather="unlock"></i></div>
-                <h3 class="font-black text-2xl mb-2">Decrypted Restore</h3>
-                <p class="text-slate-400 font-medium">Unlock and recover data.</p>
+                <h3 class="font-black text-2xl mb-2">Local Restore</h3>
+                <p class="text-slate-400 font-medium">Decrypt and recover specific data.</p>
             </div>
         </div>
 
         <div id="panel-export" class="config-panel p-10 bg-white rounded-[3rem] shadow-2xl border-2 border-slate-50">
-            <h2 class="text-2xl font-black mb-6">Security Settings</h2>
+            <h2 class="text-2xl font-black mb-6">Backup Security</h2>
             <div class="space-y-4 max-w-md">
                 <input type="password" id="export-pass" placeholder="Create backup password..." class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-4 ring-indigo-500/10 transition">
                 <button onclick="performProtectedExport()" id="export-btn" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition flex items-center justify-center gap-3">
@@ -77,10 +83,10 @@
         </div>
 
         <div id="panel-restore" class="config-panel p-10 bg-white rounded-[3rem] shadow-2xl border-2 border-red-50">
-            <h2 class="text-2xl font-black mb-6">Import Local Backup</h2>
+            <h2 class="text-2xl font-black mb-6">Restore from File</h2>
             <div class="p-16 border-4 border-dashed border-slate-100 rounded-[3rem] text-center">
                 <input type="file" id="restore-input" class="hidden" accept=".linkstackbackup" onchange="initiateRestore(event)">
-                <button onclick="document.getElementById('restore-input').click()" class="px-12 py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition">Select .linkstackbackup</button>
+                <button onclick="document.getElementById('restore-input').click()" class="px-12 py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition">Upload .linkstackbackup</button>
             </div>
         </div>
 
@@ -94,7 +100,7 @@
                     <i data-feather="layers" class="w-8 h-8"></i>
                 </div>
                 <h2 class="text-3xl font-black tracking-tight">Access Restricted</h2>
-                <p class="text-slate-400 font-medium">Please sign in to continue</p>
+                <p class="text-slate-400 font-medium">Please sign in to manage your vault</p>
             </div>
 
             <button onclick="loginWithGithub()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition mb-6">

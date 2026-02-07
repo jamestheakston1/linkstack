@@ -11,6 +11,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .doc-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100%; }
         .doc-card:hover { transform: translateY(-8px); }
+        .deprecated-card { border-color: #fee2e2 ! from; background-color: #fffafa; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
@@ -45,20 +46,21 @@
                     <i data-feather="terminal" class="w-7 h-7"></i>
                 </div>
                 <h2 class="text-2xl font-black tracking-tighter mb-4">API Reference</h2>
-                <p class="text-slate-500 text-sm font-medium leading-relaxed mb-8 flex-grow">Access your profile data programmatically via our REST API and live endpoints.</p>
+                <p class="text-slate-500 text-sm font-medium leading-relaxed mb-8 flex-grow">Access your profile data programmatically via our primary REST API and live endpoints.</p>
                 <div class="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest">
                     Documentation <i data-feather="arrow-right" class="w-4 h-4"></i>
                 </div>
             </a>
 
-            <a href="../blog/vaultapi.html" class="doc-card group p-8 bg-white rounded-[3rem] border-2 border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col border-blue-100">
-                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
-                    <i data-feather="lock" class="w-7 h-7"></i>
+            <a href="../blog/vaultapi.html" class="doc-card group p-8 bg-white rounded-[3rem] border-2 border-red-100 shadow-xl shadow-red-200/10 flex flex-col relative overflow-hidden">
+                <div class="absolute top-4 right-6 px-2 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-black uppercase tracking-tighter">Deprecated</div>
+                <div class="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
+                    <i data-feather="slash" class="w-7 h-7"></i>
                 </div>
                 <h2 class="text-2xl font-black tracking-tighter mb-4">Vault API</h2>
-                <p class="text-slate-500 text-sm font-medium leading-relaxed mb-8 flex-grow">Learn how to grab users links, analytics and more in the form of a backup - Coming Soon.</p>
-                <div class="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest">
-                    Announcement <i data-feather="arrow-right" class="w-4 h-4"></i>
+                <p class="text-slate-400 text-sm font-medium leading-relaxed mb-8 flex-grow italic">Status: Retired. Features consolidated into Public API to remove redundancy.</p>
+                <div class="flex items-center gap-2 text-red-600 font-black text-xs uppercase tracking-widest">
+                    Post-Mortem <i data-feather="arrow-right" class="w-4 h-4"></i>
                 </div>
             </a>
         </div>

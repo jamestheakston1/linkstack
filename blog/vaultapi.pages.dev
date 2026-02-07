@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vault is Live: Portable Identity Across the Web | Blog</title>
+    <meta name="description" content="LinkStack Vault is officially live. Learn how we are building the foundation for websites to display your data across the internet after our rebrand.">
+    <meta name="author" content="James Theakston">
+    <meta name="robots" content="index, follow">
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+
+    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/dashboard/backup.html'">
+            <i data-feather="layers"></i><span>LinkStack</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="location.href='/dashboard/backup.html'" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:scale-105 transition">Back to Vault</button>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20 px-6">
+        <article class="max-w-3xl mx-auto">
+            <header class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-black uppercase tracking-widest">Live Today</span>
+                    <span class="text-slate-400 text-xs font-bold">February 7, 2026</span>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-black mb-8 tracking-tighter leading-tight">
+                    The Vault is <span class="gradient-text">Open.</span> Your identity is now portable.
+                </h1>
+                <p class="text-xl text-slate-500 font-medium leading-relaxed mb-8">
+                    Today we launch the LinkStack Vault, giving you total ownership of your data. But this is just the beginning of a truly connected ecosystem.
+                </p>
+            </header>
+
+            <div class="aspect-video w-full bg-indigo-600 rounded-[2.5rem] mb-12 flex items-center justify-center text-white overflow-hidden relative shadow-2xl shadow-indigo-200">
+                <div class="absolute inset-0 opacity-20">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                    </svg>
+                </div>
+                <div class="relative flex flex-col items-center gap-4 text-center px-4">
+                    <div class="w-20 h-20 bg-white text-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl mb-2">
+                        <i data-feather="share-2" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-3xl font-black tracking-tight">Vault Protocol V1</h2>
+                    <p class="font-bold text-indigo-100 tracking-widest uppercase text-xs">Portable Data • Decoupled Identity</p>
+                </div>
+            </div>
+
+            <div class="prose prose-slate prose-lg max-w-none space-y-8 text-slate-600 leading-relaxed">
+                <p>
+                    Ownership of data is more than just having a backup; it's about the ability to move that data wherever you need it. Today's launch of the <strong>LinkStack Vault</strong> provides the security layer for your digital identity, but the future we are building is much larger.
+                </p>
+
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Beyond the Dashboard</h2>
+                <p>
+                    We believe your LinkStack profile should live everywhere you do. We are currently developing a suite of upcoming protocols—<strong>GET and POST</strong>—that will allow external websites to request authorization from you directly.
+                </p>
+                
+                <p>
+                    Imagine landing on a personal portfolio site or a new social tool and being able to "Connect with LinkStack." Once authorized, that website can programmatically export your public data from the Vault and display your links, bio, and social graph natively within their own design.
+                </p>
+
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm my-12">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">Upcoming Architecture Features</h3>
+                    <ul class="space-y-6">
+                        <li class="flex gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex-shrink-0 flex items-center justify-center">
+                                <i data-feather="repeat" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="block font-black text-slate-900 uppercase text-xs tracking-widest">Post-Rebrand Release</span>
+                                <span class="text-sm"><strong>The API & Auth Layer:</strong> Programmatic access will officially launch following our transition to LinkLayer. <a href="../blog/rebrand.html" class="text-indigo-600 font-bold hover:underline underline-offset-4 ml-1 inline-flex items-center gap-1">Learn more <i data-feather="arrow-right" class="w-3 h-3"></i></a></span>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex-shrink-0 flex items-center justify-center">
+                                <i data-feather="external-link" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="block font-black text-slate-900 uppercase text-xs tracking-widest">Interoperability</span>
+                                <span class="text-sm"><strong>Cross-Site Display:</strong> Developers will soon be able to fetch your data via GET requests to build custom integrations that showcase your identity anywhere on the web.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Wait for the Key</h2>
+                <p>
+                    While the full API suite isn't out yet, the infrastructure is being laid today. By using the Vault now, you are readying your identity for the next generation of the web—one where you are the sole gatekeeper of your information.
+                </p>
+
+                <p>
+                    For now, explore the new manual export and restore features in your dashboard. Your data is officially in your hands.
+                </p>
+
+                <div class="pt-12 border-t border-slate-100 flex items-center gap-6">
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                            <i data-feather="user" class="w-8 h-8"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-lg text-slate-900 leading-none mb-1">James Theakston</h4>
+                        <p class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Founder & CEO, LinkStack</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-12 px-8">
+        <div class="max-w-3xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2 font-black text-xl text-indigo-600">
+                <i data-feather="layers"></i><span>LinkStack</span>
+            </div>
+            <p class="text-slate-400 text-sm font-bold">© 2026 James Theakston</p>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = () => {
+            feather.replace();
+        };
+    </script>
+</body>
+</html>

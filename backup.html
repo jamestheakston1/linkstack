@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault | LinkStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .action-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: 2px solid transparent; }
+        .action-card.active { border-color: #4f46e5; background: #f5f3ff; }
+        .config-panel { display: none; }
+        .config-panel.active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2 font-black text-2xl text-indigo-600 cursor-pointer" onclick="location.href='/dashboard'">
+            <i data-feather="layers"></i><span>LinkStack<span class="text-slate-400">.vault</span></span>
+        </div>
+        <a href="/dashboard" class="text-sm font-bold text-slate-500 hover:text-slate-800 transition">Dashboard</a>
+    </nav>
+
+    <main id="main-content" class="max-w-4xl mx-auto pt-40 px-6 pb-24 opacity-0 transition-opacity duration-500">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-black tracking-tight mb-2">Encrypted Vault</h1>
+            <p class="text-slate-500 font-medium text-lg">Securely export your digital identity with AES-GCM encryption.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div onclick="selectMode('export')" id="card-export" class="action-card p-10 bg-white rounded-[3rem] shadow-xl shadow-slate-200/40">
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-8"><i data-feather="lock"></i></div>
+                <h3 class="font-black text-2xl mb-2">Protected Export</h3>
+                <p class="text-slate-400 font-medium">Encrypt and download your stack.</p>
+            </div>
+            <div onclick="selectMode('restore')" id="card-restore" class="action-card p-10 bg-white rounded-[3rem] shadow-xl shadow-slate-200/40">
+                <div class="w-14 h-14 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center mb-8"><i data-feather="unlock"></i></div>
+                <h3 class="font-black text-2xl mb-2">Decrypted Restore</h3>
+                <p class="text-slate-400 font-medium">Decrypt and select components.</p>
+            </div>
+        </div>
+
+        <div id="panel-export" class="config-panel p-10 bg-white rounded-[3rem] shadow-2xl border-2 border-slate-50">
+            <h2 class="text-2xl font-black mb-6">Backup Security</h2>
+            <div class="space-y-4 max-w-md">
+                <input type="password" id="export-pass" placeholder="Set backup password..." class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-4 ring-indigo-500/10 transition">
+                <button onclick="performProtectedExport()" id="export-btn" class="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 transition flex items-center justify-center gap-3">
+                    <i data-feather="download-cloud"></i> Secure Download
+                </button>
+            </div>
+        </div>
+
+        <div id="panel-restore" class="config-panel p-10 bg-white rounded-[3rem] shadow-2xl border-2 border-red-50">
+            <h2 class="text-2xl font-black mb-6">Import Backup</h2>
+            <div class="p-16 border-4 border-dashed border-slate-100 rounded-[3rem] text-center">
+                <input type="file" id="restore-input" class="hidden" accept=".linkstackbackup" onchange="initiateRestore(event)">
+                <button onclick="document.getElementById('restore-input').click()" class="px-12 py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition">Upload .linkstackbackup</button>
+            </div>
+        </div>
+
+        <div id="status-log" class="mt-8 hidden p-6 bg-slate-900 rounded-[2rem] font-mono text-[11px] text-indigo-400 space-y-1"></div>
+    </main>
+
+    <div id="auth-modal" class="fixed inset-0 z-[200] hidden modal-overlay flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="layers" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-3xl font-black tracking-tight">Welcome Back</h2>
+                <p class="text-slate-400 font-medium">Login to access your vault</p>
+            </div>
+
+            <button onclick="loginWithGithub()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition mb-6">
+                <i data-feather="github"></i> Continue with GitHub
+            </button>
+
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
+                <div class="relative flex justify-center text-xs uppercase font-black text-slate-300"><span class="bg-white px-4">Or use email</span></div>
+            </div>
+
+            <div class="space-y-3">
+                <input type="email" id="auth-email" placeholder="Email address" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 ring-indigo-500/10 transition">
+                <input type="password" id="auth-password" placeholder="Password" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 ring-indigo-500/10 transition">
+                <button onclick="loginWithEmail()" class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg hover:bg-indigo-700 transition">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="restore-modal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] p-10">
+            <h2 class="text-3xl font-black mb-6" id="modal-title">Unlock Vault</h2>
+            <div id="password-step" class="space-y-4">
+                <input type="password" id="restore-pass" placeholder="Enter backup password..." class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none">
+                <button onclick="decryptAndProceed()" class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl">Decrypt File</button>
+            </div>
+            <div id="options-step" class="hidden space-y-4">
+                <div class="space-y-2 mb-8" id="restore-toggles">
+                    <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="opt-profile" checked class="mr-3 w-5 h-5 rounded"> <span class="font-bold">Profile Info</span></label>
+                    <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="opt-links" checked class="mr-3 w-5 h-5 rounded"> <span class="font-bold">Links & Socials</span></label>
+                </div>
+                <button onclick="executeFinalRestore()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-100">Restore Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+        const SB_URL = 'https://xcicvuqdoztxhidwdmlc.supabase.co';
+        const SB_KEY = 'sb_publishable_DeSw5UHzjV444ZF6eMkB0g_taV-dynR';
+        const supabase = createClient(SB_URL, SB_KEY);
+
+        let currentUser = null;
+        let encryptedBlob = null;
+        let activeDecryptedData = null;
+
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+            } else {
+                currentUser = session.user;
+                document.getElementById('main-content').classList.remove('opacity-0');
+            }
+            feather.replace();
+        }
+
+        window.loginWithGithub = async () => {
+            await supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: window.location.href } });
+        };
+
+        window.loginWithEmail = async () => {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else location.reload();
+        };
+
+        window.selectMode = (m) => {
+            document.querySelectorAll('.action-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`card-${m}`).classList.add('active');
+            document.getElementById(`panel-${m}`).classList.add('active');
+        };
+
+        async function deriveKey(password, salt) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+            return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+        }
+
+        window.performProtectedExport = async () => {
+            const pass = document.getElementById('export-pass').value;
+            if (!pass) return alert("Please set a password.");
+            
+            const btn = document.getElementById('export-btn');
+            btn.innerHTML = 'Encrypting...';
+            
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+            const { data: links } = await supabase.from('links').select('*').eq('user_id', currentUser.id);
+            const data = JSON.stringify({ profile, links, signature: "LINKSTACK_SECURE" });
+
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(pass, salt);
+            const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(data));
+
+            const finalBlob = new Blob([salt, iv, new Uint8Array(encrypted)], { type: 'application/octet-stream' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(finalBlob);
+            a.download = `${profile.handle}.linkstackbackup`;
+            a.click();
+            log("Vault exported and encrypted.");
+            btn.innerHTML = 'Secure Download';
+        };
+
+        window.initiateRestore = async (e) => {
+            const file = e.target.files[0];
+            encryptedBlob = await file.arrayBuffer();
+            document.getElementById('restore-modal').classList.remove('hidden');
+        };
+
+        window.decryptAndProceed = async () => {
+            const pass = document.getElementById('restore-pass').value;
+            try {
+                const salt = encryptedBlob.slice(0, 16);
+                const iv = encryptedBlob.slice(16, 28);
+                const data = encryptedBlob.slice(28);
+                const key = await deriveKey(pass, salt);
+                const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, data);
+                activeDecryptedData = JSON.parse(new TextDecoder().decode(decrypted));
+                
+                document.getElementById('password-step').classList.add('hidden');
+                document.getElementById('options-step').classList.remove('hidden');
+                document.getElementById('modal-title').innerText = "Configure Restore";
+            } catch (e) { alert("Incorrect password or corrupt file."); }
+        };
+
+        window.executeFinalRestore = async () => {
+            if (document.getElementById('opt-links').checked) {
+                await supabase.from('links').delete().eq('user_id', currentUser.id);
+                const newLinks = activeDecryptedData.links.map(({id, created_at, ...rest}) => ({...rest, user_id: currentUser.id}));
+                await supabase.from('links').insert(newLinks);
+            }
+            if (document.getElementById('opt-profile').checked) {
+                const p = activeDecryptedData.profile;
+                await supabase.from('profiles').update({ bio: p.bio, display_name: p.display_name, theme: p.theme }).eq('id', currentUser.id);
+            }
+            window.location.href = '/dashboard';
+        };
+
+        function log(msg) {
+            const l = document.getElementById('status-log');
+            l.classList.remove('hidden');
+            l.innerHTML += `<div>>> ${msg}</div>`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
